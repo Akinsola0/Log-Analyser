@@ -1,0 +1,20 @@
+Event[0]:
+  Log Name: System
+  Source: Service Control Manager
+  Date: 2024-01-15T10:23:45.123Z
+  Event ID: 7031
+  Task: N/A
+  Level: Error
+  Computer: APPSRV01
+  Description:
+The Acme Order Service service terminated unexpectedly.
+It has done this 3 time(s).
+Event[1]:
+  Log Name: Application
+  Source: .NET Runtime
+  Date: 2024-01-15T10:23:44.000Z
+  Event ID: 1026
+  Level: Error
+  Computer: APPSRV01
+  Description:
+Application: AcmeOrder.exe Unhandled Exception: System.Data.SqlClient.SqlException: Timeout expired.
