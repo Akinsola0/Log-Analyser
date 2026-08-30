@@ -15,6 +15,7 @@ from flask import Flask, jsonify, render_template, request
 from ..analysis.engine import Analyser
 from ..ai import explain as ai
 from ..rules.loader import load_rules
+from .. import report_html
 
 MAX_UPLOAD_MB = int(os.environ.get("LOGANALYSER_MAX_MB", "256"))
 # Beyond this we still analyse, but stop holding every raw line in memory.
@@ -37,6 +38,20 @@ def _decode(data: bytes) -> List[str]:
             continue
         return text.splitlines()
     return data.decode("latin-1", "replace").splitlines()
+
+
+def _read_input(request):
+    """Pull log lines out of an upload or a pasted body.
+
+    Returns (lines, filename, error_message).
+    """
+    upload = request.files.get("file")
+    if upload and upload.filename:
+        return _decode(upload.read()), upload.filename, None
+    pasted = request.form.get("text", "")
+    if pasted.strip():
+        return pasted.splitlines(), "pasted-log", None
+    return [], None, "No log content received. Choose a file or paste some text."
 
 
 def create_app() -> Flask:
@@ -72,21 +87,9 @@ def create_app() -> Flask:
     def analyse():
         fmt = request.form.get("format") or request.args.get("format") or "auto"
         use_ai = (request.form.get("use_ai") or "").lower() in ("1", "true", "on", "yes")
-        filename = None
-        lines: List[str] = []
-
-        upload = request.files.get("file")
-        if upload and upload.filename:
-            filename = upload.filename
-            lines = _decode(upload.read())
-        else:
-            pasted = request.form.get("text", "")
-            if pasted.strip():
-                filename = "pasted-log"
-                lines = pasted.splitlines()
-
-        if not lines:
-            return jsonify({"error": "No log content received. Choose a file or paste some text."}), 400
+        lines, filename, error = _read_input(request)
+        if error:
+            return jsonify({"error": error}), 400
 
         truncated = 0
         if len(lines) > MAX_LINES:
@@ -107,6 +110,30 @@ def create_app() -> Flask:
         payload["truncated_lines"] = truncated
         payload["ai_explanations"] = ai_used
         return jsonify(payload)
+
+    @app.post("/api/report.html")
+    def download_report():
+        """Return the same analysis as a self-contained HTML file.
+
+        The content is re-posted rather than cached server-side, so no log
+        data is retained between requests.
+        """
+        lines, filename, error = _read_input(request)
+        if error:
+            return jsonify({"error": error}), 400
+        try:
+            report = analyser.analyse(lines, fmt=request.form.get("format") or "auto",
+                                      filename=filename)
+        except Exception as exc:
+            app.logger.exception("analysis failed")
+            return jsonify({"error": f"Could not analyse this log: {exc}"}), 500
+
+        stem = Path(filename or "log").stem or "log"
+        download_name = f"{stem}-report.html"
+        return report_html.render(report), 200, {
+            "Content-Type": "text/html; charset=utf-8",
+            "Content-Disposition": f'attachment; filename="{download_name}"',
+        }
 
     @app.errorhandler(413)
     def too_large(_):

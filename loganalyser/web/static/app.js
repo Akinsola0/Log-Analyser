@@ -28,12 +28,49 @@ $("#toggle-paste").addEventListener("click", () => {
 $("#text").addEventListener("input", e => { runBtn.disabled = !e.target.value.trim() && !chosenFile; });
 
 runBtn.addEventListener("click", analyse);
+$("#download").addEventListener("click", downloadReport);
 
-async function analyse() {
+function currentBody() {
   const body = new FormData();
   if (chosenFile) body.append("file", chosenFile);
   else body.append("text", $("#text").value);
   body.append("format", $("#format").value);
+  return body;
+}
+
+/* The report is rendered server-side, so we re-post the log rather than keep
+   it cached on the server between requests. */
+async function downloadReport() {
+  const btn = $("#download");
+  const label = btn.textContent;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Building report';
+  try {
+    const res = await fetch("/api/report.html", { method: "POST", body: currentBody() });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || `Could not build the report (${res.status})`);
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = (chosenFile ? chosenFile.name.replace(/\.[^.]+$/, "") : "log") + "-report.html";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  } catch (err) {
+    errorBox.textContent = err.message;
+    errorBox.classList.remove("hidden");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = label;
+  }
+}
+
+async function analyse() {
+  const body = currentBody();
   body.append("use_ai", $("#use-ai").checked ? "1" : "0");
 
   runBtn.disabled = true;
@@ -125,6 +162,7 @@ function render(data) {
 
   results.innerHTML = parts.join("");
   results.classList.remove("hidden");
+  $("#actions").classList.remove("hidden");
   wireFilters();
   results.scrollIntoView({ behavior: "smooth", block: "start" });
 }

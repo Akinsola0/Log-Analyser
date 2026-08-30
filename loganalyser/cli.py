@@ -68,6 +68,9 @@ def main(argv=None) -> int:
     parser.add_argument("--format", default="auto",
                         choices=["auto", "plaintext", "syslog", "winevent"])
     parser.add_argument("--json", action="store_true", help="Emit the full report as JSON.")
+    parser.add_argument("--html", metavar="PATH",
+                        help="Write a self-contained HTML report ('-' for stdout). "
+                             "The file needs no network connection to view.")
     parser.add_argument("--top", type=int, default=10, help="How many problems to show.")
     parser.add_argument("--ai", action="store_true",
                         help="Explain unrecognised errors with Claude (needs ANTHROPIC_API_KEY).")
@@ -102,9 +105,18 @@ def main(argv=None) -> int:
         else:
             ai.explain_groups(report.groups, limit=5)
 
+    if args.html:
+        from . import report_html
+        if args.html == "-":
+            sys.stdout.write(report_html.render(report))
+        else:
+            written = report_html.write(report, Path(args.html))
+            print(f"Wrote {written} ({written.stat().st_size:,} bytes, self-contained).",
+                  file=sys.stderr)
+
     if args.json:
         print(json.dumps(report.to_dict(max_groups=args.top), indent=2))
-    else:
+    elif not args.html or args.html != "-":
         _report(report, colour=sys.stdout.isatty() and not args.no_colour, limit=args.top)
 
     # Exit 1 when errors were found, so this can gate a check in a script.

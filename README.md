@@ -51,6 +51,26 @@ cat app.log | python -m loganalyser.cli -
 It exits `1` when errors were found and `0` when clean, so you can use it
 in a script or a health check.
 
+## Shareable reports (and reading them on a tablet)
+
+Both interfaces can export the whole report as a **single self-contained
+HTML file** — all styling and the timeline chart are inlined, so it opens
+with no server, no network and no dependencies. Email it, attach it to a
+ticket, or archive it with the case.
+
+```bash
+python -m loganalyser.cli app.log --html report.html
+python -m loganalyser.cli app.log --html - > report.html    # to stdout
+```
+
+In the web app, analyse a log and click **Download report**.
+
+This is also the answer if you want to read reports on an iPad or phone:
+generate the file on a machine that can run Python, then open the file
+anywhere. It is responsive, respects light and dark mode, prints cleanly,
+and stays readable with JavaScript disabled — the inline script only adds
+the filter box.
+
 ## What a report looks like
 
 ```
@@ -142,8 +162,9 @@ loganalyser/
   rules/        the YAML knowledge base - add your own alongside these
   ai/           optional Claude explanations, with redaction
   web/          Flask app, template, CSS and front-end JS
+  report_html.py  standalone self-contained HTML report renderer
   cli.py        command-line interface
-tests/          40 tests plus sample logs
+tests/          58 tests plus sample logs
 ```
 
 ## Running the tests

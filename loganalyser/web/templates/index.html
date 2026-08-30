@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Log Analyser</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='report.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -38,6 +39,11 @@
 
   <div id="paste-area" class="hidden" style="margin-top:12px">
     <textarea id="text" placeholder="Paste log lines here..." spellcheck="false"></textarea>
+  </div>
+
+  <div id="actions" class="actions hidden">
+    <button class="secondary" id="download">Download report (single HTML file)</button>
+    <span class="hint" style="margin:0">Self-contained &mdash; opens with no server, and can be emailed or archived.</span>
   </div>
 
   <div id="error" class="panel pad error-box hidden"></div>

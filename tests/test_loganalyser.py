@@ -1,4 +1,5 @@
 """Test suite. Run with: python -m unittest discover -s tests -v"""
+import re
 import sys
 import unittest
 from datetime import datetime
@@ -13,6 +14,7 @@ from loganalyser.parsers import timestamps as ts
 from loganalyser.parsers.base import normalise_level, sniff_level
 from loganalyser.parsers.detect import parse_text
 from loganalyser.rules.loader import RuleEngine, load_rules
+from loganalyser import report_html
 from loganalyser.web.app import _decode, create_app
 
 SAMPLES = Path(__file__).parent / "sample_logs"
@@ -257,6 +259,70 @@ class TestEngineEndToEnd(unittest.TestCase):
         self.assertTrue(report.groups)
 
 
+class TestStandaloneHtmlReport(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        report = Analyser().analyse_text(
+            (SAMPLES / "incident.log").read_text(), filename="incident.log")
+        cls.html = report_html.render(report)
+
+    def test_is_a_complete_document(self):
+        self.assertTrue(self.html.startswith("<!doctype html>"))
+        self.assertIn("</html>", self.html)
+
+    def test_makes_no_external_requests(self):
+        """The whole point: it must open with no server and no network."""
+        refs = re.findall(r"""(?:src|href)\s*=\s*["'](?!#)([^"']+)""", self.html)
+        self.assertEqual(refs, [], f"report references external resources: {refs}")
+        self.assertNotIn("http://", self.html.replace("http://www.w3.org", ""))
+
+    def test_css_is_inlined(self):
+        self.assertIn("--critical", self.html)
+        self.assertIn("<style>", self.html)
+
+    def test_content_is_rendered_server_side(self):
+        """Readable with scripting disabled - the script only adds filtering."""
+        body = self.html.split("<script>")[0]
+        self.assertIn("Database connection pool exhausted", body)
+        self.assertIn("OrderRepository.java:112", body)
+        self.assertEqual(body.count('class="panel group"'), 7)
+
+    def test_chart_is_inline_svg(self):
+        self.assertIn("<svg", self.html)
+        self.assertIn('class="bar-err"', self.html)
+
+    def test_escapes_html_in_log_content(self):
+        """Log text is untrusted - it must never become live markup."""
+        report = Analyser().analyse_text(
+            '2024-01-15 10:00:00 ERROR failed loading <img src=x onerror=alert(1)> asset\n')
+        out = report_html.render(report)
+        # The payload may appear as text; what matters is that no tag forms.
+        self.assertNotIn("<img", out)
+        self.assertIn("&lt;img src=x onerror=alert(1)&gt;", out)
+
+    def test_escapes_html_inside_a_stack_trace(self):
+        report = Analyser().analyse_text(
+            "2024-01-15 10:00:00 ERROR boom\n"
+            "java.lang.IllegalStateException: <b>not</b> allowed\n"
+            "\tat com.acme.A.run(A.java:1)\n")
+        out = report_html.render(report)
+        self.assertNotIn("<b>not</b>", out)
+        self.assertIn("&lt;b&gt;", out)
+
+    def test_empty_log_still_renders(self):
+        out = report_html.render(Analyser().analyse_text(""))
+        self.assertIn("No warnings or errors found", out)
+
+    def test_write_creates_the_file(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            path = report_html.write(
+                Analyser().analyse_text((SAMPLES / "syslog.log").read_text()),
+                Path(tmp) / "out.html")
+            self.assertTrue(path.is_file())
+            self.assertGreater(path.stat().st_size, 5000)
+
+
 class TestRedaction(unittest.TestCase):
     def test_secrets_are_stripped(self):
         out = ai.redact("password=hunter2 Authorization: Bearer sk-ant-api03-abcdefghijkl "
@@ -303,6 +369,24 @@ class TestWebApp(unittest.TestCase):
         response = self.client.post("/api/analyse", data=data, content_type="multipart/form-data")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()["detected_format"], "winevent")
+
+    def test_download_html_report(self):
+        response = self.client.post("/api/report.html", data={
+            "text": (SAMPLES / "incident.log").read_text(), "format": "auto"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("text/html", response.headers["Content-Type"])
+        self.assertIn("attachment", response.headers["Content-Disposition"])
+        self.assertIn(b"Database connection pool exhausted", response.data)
+
+    def test_download_names_the_file_after_the_upload(self):
+        import io
+        data = {"file": (io.BytesIO((SAMPLES / "winevent.csv").read_bytes()), "winevent.csv")}
+        response = self.client.post("/api/report.html", data=data,
+                                    content_type="multipart/form-data")
+        self.assertIn("winevent-report.html", response.headers["Content-Disposition"])
+
+    def test_download_rejects_empty_input(self):
+        self.assertEqual(self.client.post("/api/report.html", data={"text": " "}).status_code, 400)
 
     def test_empty_request_is_rejected(self):
         response = self.client.post("/api/analyse", data={"text": "  "})
