@@ -311,6 +311,29 @@ Public and unauthenticated: rate-limit it, and verify the phone number before th
 7. **Photo storage.** `photo_urls[]` is empty in mock data and listings render an initials tile. Tell us the Supabase Storage bucket/URL pattern and we'll add it to `next.config.ts` `images.remotePatterns`.
 8. **Sign-out and session refresh.** The dashboard's sign-out is a link to `/login` today; point us at the helper you want called.
 
+## Which screen calls what
+
+| Screen | Functions it calls |
+|---|---|
+| `/` (homepage) | `getCategories`, `getLocations`, `getFeaturedReviews` |
+| `/find` | `getCategories`, `getLocations` |
+| `/find/[category]/[location]` | `getCategories`, `getLocations`, `getLocation`, `searchListings` |
+| `/pro/[slug]` | `getMarketplaceProfile`, `getCategories`, `createMarketplaceLead` |
+| Dashboard shell | `getSession` |
+| `/dashboard` | `getDashboardSummary`, `getAttentionItems`, `getJobs`, `getCalls` |
+| `/dashboard/leads` | `getLeads`, `updateLeadStatus` |
+| `/dashboard/calendar` | `getSession`, `getJobs`, `getAvailability`, `updateJob` |
+| `/dashboard/calls` | `getCalls`, `reclassifyCall` |
+| `/dashboard/messages` | `getMessages`, `retryMessage` |
+| `/dashboard/availability` | `getSession`, `getAvailability`, `saveAvailability` |
+| `/dashboard/settings` | `getBusiness`, `updateBusiness` |
+
+The marketing and marketplace pages are React Server Components (so they're
+indexable); the dashboard screens are client components, because they mutate.
+When these become real routes, the server pages can call the data layer directly
+and the client screens will go over HTTP — the function signatures don't change
+either way.
+
 ## Where the stubs are
 
 Every place the UI needs something from you is marked in code:
