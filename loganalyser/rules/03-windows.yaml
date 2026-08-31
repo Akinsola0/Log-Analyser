@@ -1,0 +1,212 @@
+# Windows Event Log signatures, matched on Event ID and/or message text.
+
+- id: win-service-crashed
+  title: Windows service terminated unexpectedly
+  category: lifecycle
+  severity: critical
+  confidence: 0.95
+  event_ids: ["7031", "7034"]
+  patterns:
+    - 'terminated unexpectedly'
+  meaning: >
+    The Service Control Manager noticed a service died without being asked to
+    stop. The count of times it has done this tells you whether this is a
+    one-off or a crash loop. The reason for the crash is not here - it is in
+    the application's own log, or in an Application Error event at the same
+    timestamp.
+  causes:
+    - An unhandled exception in the service process
+    - The process was killed for using too much memory
+    - A dependency the service needs at startup was unavailable
+  checks:
+    - Look for an Application Error (1000) or .NET Runtime (1026) event at the same second
+    - Open the application's own log file for that timestamp
+    - Note the restart count - "3 time(s)" means recovery actions are being used up
+
+- id: win-service-start-failure
+  title: Windows service failed to start
+  category: lifecycle
+  severity: critical
+  confidence: 0.95
+  event_ids: ["7000", "7009", "7011", "7024"]
+  meaning: >
+    The service did not come up. A 7009 means it did not respond to the start
+    request in time; a 7024 carries a service-specific exit code that usually
+    identifies the real reason.
+  causes:
+    - Startup takes longer than the Service Control Manager timeout
+    - Missing configuration, a bad service account password, or a missing dependency
+    - The service crashed immediately on startup
+  checks:
+    - Read the service-specific error code in the event text
+    - Check the Log On account and whether its password was rotated
+    - Confirm dependent services are running
+    - Look in the application's own log for a startup exception
+
+- id: win-application-crash
+  title: Application crashed - faulting module recorded
+  category: code
+  severity: critical
+  confidence: 0.95
+  event_ids: ["1000"]
+  meaning: >
+    A process terminated abnormally. The event names the faulting module and
+    an exception code, which points at what kind of crash it was - for
+    example 0xe0434352 is an unhandled .NET exception and 0xc0000005 is an
+    access violation.
+  causes:
+    - Unhandled exception in application code (exception code 0xe0434352)
+    - Access violation - bad memory access, often in native code (0xc0000005)
+    - A corrupted or mismatched DLL named as the faulting module
+  checks:
+    - Note the faulting module name - if it is not your code, look at that component
+    - Look up the exception code in the event
+    - Check for a matching .NET Runtime 1026 event with the full stack trace
+    - Check whether a Windows update or agent install preceded the first crash
+
+- id: win-dotnet-unhandled
+  title: Unhandled .NET exception
+  category: code
+  severity: critical
+  confidence: 0.95
+  event_ids: ["1026"]
+  meaning: >
+    The .NET runtime recorded an exception that no code caught, which
+    terminated the process. This event carries the exception type and stack
+    trace - it is usually the most informative record of a managed crash.
+  causes:
+    - A code path with no exception handling
+    - A dependency failure surfacing on a background thread, where an unhandled
+      exception kills the whole process
+  checks:
+    - Read the exception type and the top application frames in the event text
+    - Check whether the failure is on a background thread or timer
+    - Correlate with an Application Error (1000) event for the same process
+
+- id: win-disk-error
+  title: Disk or storage device error
+  category: resource
+  severity: critical
+  confidence: 0.9
+  event_ids: ["7", "9", "11", "15", "51", "153", "129"]
+  # These ids are low and reused by unrelated providers, so require the
+  # event to actually come from a storage driver.
+  sources:
+    - 'disk|storahci|stornvme|iaStor|megasr|vhdmp|volmgr|ntfs|mpio|msiscsi'
+  patterns:
+    - 'bad block|device .{0,40}has a bad block|error was detected on device'
+    - 'reset to device|paging operation'
+  meaning: >
+    The storage stack reported a device-level problem - a bad block, a reset,
+    or a timeout talking to the disk. This is hardware or storage-path
+    trouble, and application errors around it are consequences.
+  causes:
+    - Failing physical disk or controller
+    - SAN/iSCSI path flapping or storage latency
+    - Driver or firmware fault
+  checks:
+    - Check the disk's SMART status and the storage vendor's own logs
+    - Look for repeated resets (129) which indicate path or latency problems
+    - Treat any data written around this time as suspect
+
+- id: win-logon-failure
+  title: Account logon failed
+  category: security
+  severity: medium
+  confidence: 0.85
+  event_ids: ["4625", "4771", "4776"]
+  meaning: >
+    An authentication attempt was rejected. The failure reason and status code
+    in the event distinguish a wrong password from a disabled, locked or
+    expired account. A burst of these from one source is worth attention.
+  causes:
+    - Service account password rotated but not updated everywhere it is used
+    - Account locked out, disabled or expired
+    - A stale scheduled task or mapped drive retrying old credentials
+    - Brute-force attempts against an exposed service
+  checks:
+    - Read the failure reason / status code in the event
+    - Identify the source workstation or IP and which account is being used
+    - Check whether the account is locked out, and what keeps retrying it
+
+- id: win-apppool-disabled
+  title: IIS application pool stopped or disabled
+  category: lifecycle
+  severity: critical
+  confidence: 0.95
+  event_ids: ["5002", "5117", "5057", "5059"]
+  patterns:
+    - 'application pool.{0,60}(disabled|stopped)'
+  meaning: >
+    IIS shut down an application pool because its worker processes kept
+    failing rapid-fail protection. Every site in that pool is down until it
+    is started again, and it will not restart itself.
+  causes:
+    - Worker process crashing repeatedly on startup
+    - Application pool identity lacking permissions after a change
+    - A bad deployment causing immediate failure on every request
+  checks:
+    - Look for Application Error (1000) events for w3wp.exe just before this
+    - Check the application pool identity and its permissions on the site folder
+    - Start the pool once the underlying crash is understood - not before
+
+- id: win-schannel-error
+  title: Schannel TLS error
+  category: security
+  severity: high
+  confidence: 0.85
+  event_ids: ["36871", "36874", "36887", "36888"]
+  meaning: >
+    Windows' TLS implementation failed to negotiate or maintain a secure
+    connection. Frequently follows a security hardening change that disabled
+    older TLS versions or cipher suites on one side only.
+  causes:
+    - TLS 1.0/1.1 disabled by policy while a client or server still requires it
+    - No cipher suite in common between the two ends
+    - Certificate chain or trust problem on the Windows side
+  checks:
+    - Compare the enabled TLS versions and cipher suites on both machines
+    - Check for a recent security hardening or Windows update
+    - Note the alert code in the event - it identifies which side rejected what
+
+- id: win-bugcheck
+  title: System crashed - bugcheck (blue screen)
+  category: resource
+  severity: critical
+  confidence: 0.95
+  event_ids: ["1001", "41"]
+  patterns:
+    - 'bugcheck|The system has rebooted without cleanly shutting down'
+  meaning: >
+    The machine stopped or restarted without a clean shutdown. Everything
+    running on it stopped at that instant - no application log after this
+    point is meaningful until the restart.
+  causes:
+    - Driver or hardware fault
+    - Power loss or a forced reset from the hypervisor
+    - Memory or storage hardware failure
+  checks:
+    - Note the bugcheck code in the event and look it up
+    - Check whether a memory dump was written
+    - Correlate with hardware/hypervisor logs for the same timestamp
+
+- id: win-resource-exhaustion
+  title: System running out of memory or paged pool
+  category: resource
+  severity: critical
+  confidence: 0.9
+  event_ids: ["2019", "2020", "2004"]
+  patterns:
+    - 'resource exhaustion|running low on (memory|virtual memory)'
+  meaning: >
+    Windows itself is running short of memory or kernel pool. This degrades
+    every process on the machine, so errors from your application at this
+    time are likely symptoms rather than the cause.
+  causes:
+    - A process leaking handles or non-paged pool memory
+    - The machine undersized for what is running on it
+    - A driver leaking kernel memory
+  checks:
+    - Identify the top memory consumers at that time
+    - Check handle counts for long-running processes
+    - Compare against the machine's total RAM and commit limit

@@ -1,0 +1,11 @@
+Jan 15 10:15:01 web01 systemd[1]: Started Acme Order Service.
+Jan 15 10:20:44 web01 nginx[2201]: 10.0.0.5 - - [15/Jan/2024:10:20:44 +0000] "POST /api/orders HTTP/1.1" 200 412
+<11>Jan 15 10:22:03 db01 postgres[900]: FATAL: remaining connection slots are reserved for non-replication superuser connections
+<11>Jan 15 10:22:04 db01 postgres[901]: FATAL: remaining connection slots are reserved for non-replication superuser connections
+Jan 15 10:22:05 web01 nginx[2201]: 10.0.0.5 - - [15/Jan/2024:10:22:05 +0000] "POST /api/orders HTTP/1.1" 502 166
+Jan 15 10:22:06 web01 nginx[2201]: upstream timed out (110: Connection timed out) while reading response header from upstream
+Jan 15 10:22:30 web01 kernel: Out of memory: Killed process 3312 (java) total-vm:8123456kB
+Jan 15 10:22:31 web01 systemd[1]: acme-order.service: Main process exited, code=killed, status=9/KILL
+Jan 15 10:23:00 web01 sshd[4321]: Failed password for invalid user admin from 203.0.113.9 port 55234 ssh2
+Jan 15 10:23:02 web01 sshd[4322]: Failed password for invalid user admin from 203.0.113.9 port 55240 ssh2
+Jan 15 10:24:00 web01 systemd[1]: Started Acme Order Service.

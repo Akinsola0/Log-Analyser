@@ -1,0 +1,5 @@
+Level,Date and Time,Source,Event ID,Task Category,Computer,Description
+Error,1/15/2024 10:23:45 AM,Service Control Manager,7031,None,APPSRV01,"The Acme Order Service service terminated unexpectedly. It has done this 3 time(s)."
+Error,1/15/2024 10:23:44 AM,Application Error,1000,(100),APPSRV01,"Faulting application name: AcmeOrder.exe, version 4.2.1.0, faulting module name: KERNELBASE.dll, exception code: 0xe0434352"
+Warning,1/15/2024 10:20:11 AM,Disk,51,None,APPSRV01,"An error was detected on device \Device\Harddisk1\DR1 during a paging operation."
+Information,1/15/2024 10:24:02 AM,Service Control Manager,7036,None,APPSRV01,"The Acme Order Service service entered the running state."

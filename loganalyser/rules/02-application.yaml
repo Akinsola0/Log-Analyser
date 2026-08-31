@@ -1,0 +1,431 @@
+# Application-level failures: code defects, configuration, auth and HTTP.
+
+- id: null-reference
+  title: Null / nil reference - code used something that was not there
+  category: code
+  severity: high
+  confidence: 0.85
+  patterns:
+    - 'NullPointerException'
+    - 'NullReferenceException'
+    - "Cannot read propert(y|ies) of (null|undefined)"
+    - "'NoneType' object has no attribute"
+    - 'TypeError: .{0,40}(null|undefined) is not'
+  meaning: >
+    The code assumed a value existed and it did not. The message usually names
+    exactly which value was null; the stack trace names the line. This is a
+    code defect, but the null often arrives because something upstream failed
+    quietly - a lookup returned nothing, or an optional field was missing.
+  causes:
+    - A lookup or database query returned no result and the code did not check
+    - An optional field missing from a request, config file or API response
+    - An earlier failure left an object partly initialised
+  checks:
+    - Read the deepest application frame in the stack trace - that is the line to fix
+    - Work out which input was missing and where it should have come from
+    - Look just above this error for a failed lookup or an empty response
+
+- id: class-or-module-not-found
+  title: A class, module or dependency is missing at runtime
+  category: config
+  severity: critical
+  confidence: 0.9
+  patterns:
+    - 'ClassNotFoundException'
+    - 'NoClassDefFoundError'
+    - 'ModuleNotFoundError'
+    - "ImportError: cannot import name"
+    - "Cannot find module '"
+    - 'Could not load file or assembly'
+    - 'NoSuchMethodError'
+  meaning: >
+    The code referenced something that is not on the runtime path. The build
+    may have succeeded while the deployed artifact is missing a dependency, or
+    two versions of a library are conflicting.
+  causes:
+    - A dependency missing from the deployed package
+    - Version mismatch - the deployed library does not have the expected class or method
+    - Two versions of the same library on the classpath, wrong one wins
+    - Optional dependency not installed in this environment
+  checks:
+    - Compare the deployed dependency versions against the ones the build expects
+    - For NoSuchMethodError, look for two copies of the same library
+    - Confirm the artifact was fully deployed rather than partially copied
+
+- id: config-missing
+  title: Required configuration is missing or invalid
+  category: config
+  severity: critical
+  confidence: 0.85
+  patterns:
+    - 'Could not resolve placeholder'
+    - 'No such (config|property|setting)'
+    - 'Configuration property .{0,60} (is required|not found)'
+    - 'missing required (environment variable|config|property)'
+    - 'KeyError: .{0,40}(CONFIG|ENV|SETTING)'
+    - 'Failed to (bind|load) properties'
+    - 'InvalidConfigurationException'
+  meaning: >
+    The application could not find a setting it needs. It usually fails during
+    startup, which means the service never became healthy - later errors are
+    just consequences.
+  causes:
+    - Environment variable or secret not set in this environment
+    - Config file not deployed, or a typo in a key name
+    - A new setting added in this release but not added to the environment
+  checks:
+    - Note the exact property name in the message and confirm it is set
+    - Compare this environment's configuration against a working one
+    - Check whether the setting was newly introduced by the last release
+
+- id: auth-unauthorized
+  title: Authentication failed - 401 Unauthorized
+  category: security
+  severity: high
+  confidence: 0.8
+  patterns:
+    - '\b401\b.{0,30}Unauthori[sz]ed'
+    - 'Invalid (credentials|token|API key)'
+    - 'token (is )?(expired|invalid)'
+    - 'JWT (expired|signature does not match)'
+    - 'AuthenticationException'
+    - 'Unauthenticated'
+  meaning: >
+    The caller's identity was rejected. Either no credential was sent, or the
+    one sent is wrong or expired. Distinct from 403, which means the identity
+    was accepted but is not allowed to do the thing.
+  causes:
+    - Token expired and the refresh flow is not working
+    - API key or client secret rotated without updating the caller
+    - Clock skew making a valid token look expired
+    - Credential for the wrong environment
+  checks:
+    - Determine whether the token was ever valid or expired mid-session
+    - Check for a recent credential/secret rotation
+    - Verify clock sync on both machines if tokens are time-sensitive
+
+- id: auth-forbidden
+  title: Authorization failed - 403 Forbidden
+  category: security
+  severity: medium
+  confidence: 0.8
+  patterns:
+    - '\b403\b.{0,30}Forbidden'
+    - 'AccessDeniedException'
+    - 'insufficient (permissions|privileges|scope)'
+    - 'not authori[sz]ed to perform'
+    - 'missing required (role|scope|permission)'
+  meaning: >
+    The identity was recognised but is not permitted to do this. The login
+    worked; the permission set is the problem.
+  causes:
+    - Role, group or scope not granted to that account
+    - Permission model changed in a release
+    - Service account missing a grant in this environment only
+  checks:
+    - Identify which permission or scope the message names
+    - Compare the account's roles against a working environment
+    - Check whether permissions changed in the last deployment
+
+- id: rate-limited
+  title: Rate limited - 429 Too Many Requests
+  category: network
+  severity: medium
+  confidence: 0.85
+  cascade: true
+  patterns:
+    - '\b429\b'
+    - 'Too Many Requests'
+    - 'rate limit(ed| exceeded)?'
+    - 'quota exceeded'
+    - 'throttl(ed|ing)'
+  meaning: >
+    A downstream service is deliberately rejecting requests because too many
+    arrived too quickly. Usually a symptom - something upstream started
+    retrying aggressively or a batch job ran at the wrong time.
+  causes:
+    - Retry logic without backoff amplifying an earlier failure
+    - A batch or migration job running alongside normal traffic
+    - Quota reduced, or traffic genuinely grown past the plan limit
+  checks:
+    - Look for what started failing just before the rate limiting began
+    - Check retry configuration for exponential backoff and a retry cap
+    - Confirm the provider's current quota against actual request volume
+
+- id: circuit-breaker-open
+  title: Circuit breaker open - calls short-circuited
+  category: network
+  severity: medium
+  confidence: 0.9
+  cascade: true
+  patterns:
+    - 'circuit.?breaker.{0,40}(is )?open'
+    - 'CircuitBreakerOpenException'
+    - 'short.circuit'
+    - 'CallNotPermittedException'
+    - 'does not permit further calls'
+  meaning: >
+    A resilience mechanism has stopped calling a dependency because it was
+    already failing. These messages are the safety net working, not the fault
+    itself - the real error is whatever tripped the breaker earlier.
+  causes:
+    - The protected dependency was failing or timing out repeatedly
+    - Breaker threshold set too sensitively for normal error rates
+  checks:
+    - Find the errors immediately before the breaker opened - that is the real cause
+    - Check the dependency's own health at that time
+    - Note when the breaker closed again to bound the outage window
+
+- id: retries-exhausted
+  title: Retries exhausted - operation gave up
+  category: general
+  severity: medium
+  confidence: 0.85
+  cascade: true
+  patterns:
+    - 'retr(y|ies) (exhaust|limit|attempts exceeded)'
+    - 'max(imum)? retr(y|ies)'
+    - 'giving up after \d+ attempt'
+    - 'after \d+ (failed )?attempts'
+  meaning: >
+    The operation was retried and still failed every time. The interesting
+    information is in the earlier attempts - this message only reports that
+    the retries ran out.
+  causes:
+    - The underlying failure is persistent, not transient
+    - Retry window shorter than the outage
+  checks:
+    - Look for the first attempt's error - that names the actual problem
+    - Check whether the failure is one worth retrying at all
+
+- id: http-500
+  title: Server returned 500 Internal Server Error
+  category: general
+  severity: high
+  confidence: 0.7
+  patterns:
+    - '\b500\b.{0,40}Internal Server Error'
+    - 'HTTP 500'
+    - 'status(Code)?[=: ]+500\b'
+  meaning: >
+    The server hit an unhandled error while processing the request. The status
+    code itself says nothing about the cause - the exception and stack trace
+    logged alongside it are what matter.
+  causes:
+    - An unhandled exception in the request path
+    - A dependency failure surfacing as a generic error
+  checks:
+    - Find the exception logged at the same timestamp and request id
+    - Correlate the request id across services to find where it actually failed
+
+- id: serialisation-error
+  title: Could not parse or convert the data
+  category: code
+  severity: medium
+  confidence: 0.85
+  patterns:
+    - 'JsonParseException|JsonMappingException|JsonProcessingException'
+    - 'JSONDecodeError'
+    - 'Unexpected token .{0,30} in JSON'
+    - 'Unrecognized field'
+    - 'SerializationException|DeserializationException'
+    - 'XmlException|SAXParseException'
+    - 'Cannot deserialize'
+  meaning: >
+    Data arrived in a shape the code did not expect. Often the payload is not
+    what it claims to be - an HTML error page returned where JSON was
+    expected is a classic case.
+  causes:
+    - The producer changed its format or added/removed a field
+    - An error page or empty body returned instead of the expected payload
+    - Encoding or truncation corrupting the payload in transit
+  checks:
+    - Capture the actual payload received - it is often an error page, not data
+    - Compare the schema the producer sends against what the consumer expects
+    - Check whether the producer deployed a change just before this started
+
+- id: file-not-found
+  title: File or path not found
+  category: config
+  severity: medium
+  confidence: 0.8
+  patterns:
+    - 'FileNotFoundException'
+    - 'No such file or directory'
+    - 'ENOENT'
+    - 'Could not find (file|part of the path)'
+    - 'IOError: .{0,40}No such file'
+  meaning: >
+    The application looked for a file that is not at that path. Frequently a
+    relative path resolved against a different working directory than
+    expected, or a file that was never deployed.
+  causes:
+    - File not included in the deployment package
+    - Relative path resolving from an unexpected working directory
+    - A volume or share not mounted
+    - Temp file cleaned up by another process before it was read
+  checks:
+    - Note the exact path in the message and check it on the affected host
+    - Confirm the process's working directory if the path is relative
+    - Verify mounts and shares are present
+
+- id: thread-pool-exhausted
+  title: Thread pool or worker queue exhausted
+  category: resource
+  severity: high
+  confidence: 0.85
+  patterns:
+    - 'RejectedExecutionException'
+    - 'thread pool.{0,30}(exhaust|full|rejected)'
+    - 'queue (is )?full'
+    - 'all workers (are )?busy'
+    - 'WorkerPoolExhausted'
+  meaning: >
+    There were no free workers to take the task, so it was rejected outright.
+    The application is saturated - work is arriving faster than it completes,
+    usually because each task is taking longer than it should.
+  causes:
+    - Tasks blocked on a slow dependency, holding threads
+    - Pool sized too small for the load
+    - A traffic spike or backlog after a restart
+  checks:
+    - Look for what the threads were waiting on just before saturation
+    - Check whether a downstream call got slower at that moment
+    - Compare pool size and queue capacity against peak load
+
+- id: stack-overflow
+  title: Stack overflow - runaway recursion
+  category: code
+  severity: high
+  confidence: 0.95
+  patterns:
+    - 'StackOverflowError'
+    - 'RecursionError'
+    - 'maximum recursion depth exceeded'
+    - 'stack overflow'
+  meaning: >
+    A method called itself (directly or in a cycle) until the call stack ran
+    out. Almost always a code defect - look for a recursive call with a
+    missing or broken termination condition.
+  causes:
+    - Recursion with no base case, or one that is never reached
+    - A cyclic reference during serialisation - two objects referencing each other
+    - Mutually recursive methods forming a loop
+  checks:
+    - Look at the repeating pattern of frames in the trace - the cycle is the bug
+    - For serialisation cycles, check for bidirectional relationships in the model
+
+- id: divide-by-zero
+  title: Division by zero
+  category: code
+  severity: medium
+  confidence: 0.95
+  patterns:
+    - 'ArithmeticException: / by zero'
+    - 'ZeroDivisionError'
+    - 'DivideByZeroException'
+    - 'divide by zero'
+  meaning: >
+    A calculation divided by zero. The real question is why the denominator
+    was zero - usually a count, rate or total that was empty when the code
+    assumed it would not be.
+  causes:
+    - An empty result set used as a divisor (average over zero items)
+    - A rate or conversion factor missing from configuration or reference data
+  checks:
+    - Find which value was zero from the stack trace line
+    - Trace where that value is loaded and why it was empty for this input
+
+- id: index-out-of-range
+  title: Index or key out of range
+  category: code
+  severity: medium
+  confidence: 0.85
+  patterns:
+    - 'IndexOutOfBoundsException|ArrayIndexOutOfBoundsException'
+    - 'IndexError: list index out of range'
+    - 'IndexOutOfRangeException'
+    - 'index .{0,20}out of (range|bounds)'
+  meaning: >
+    The code accessed a position that does not exist in a list or array,
+    typically because the data had fewer items than expected.
+  causes:
+    - Input file or response with fewer columns/fields than assumed
+    - An off-by-one in a loop or slice
+    - Empty collection where at least one item was expected
+  checks:
+    - Identify the input being processed when it failed
+    - Check whether that input differs in shape from the usual case
+
+- id: licence-expired
+  title: Licence expired or invalid
+  category: config
+  severity: critical
+  confidence: 0.9
+  patterns:
+    - 'licen[cs]e (has )?expired'
+    - 'licen[cs]e (is )?(invalid|not valid)'
+    - 'no valid licen[cs]e'
+    - 'LicenseException'
+    - 'trial period has ended'
+  meaning: >
+    The product's licence is no longer accepted, so features stop working at a
+    fixed moment with no code change involved. A sharp cutover with no
+    deployment nearby is the signature.
+  causes:
+    - Licence reached its end date
+    - Licence tied to a hostname/MAC that changed after a migration
+    - Licence file not copied during a deployment or server move
+  checks:
+    - Check the licence expiry date and the host it is bound to
+    - Confirm the licence file is present and readable by the service account
+    - Check whether the server was migrated or renamed recently
+
+- id: version-mismatch
+  title: Version or schema mismatch between components
+  category: config
+  severity: high
+  confidence: 0.8
+  patterns:
+    - 'version mismatch'
+    - 'Unsupported (class file )?major.minor version'
+    - 'incompatible (version|schema|protocol)'
+    - 'schema version .{0,30}(expected|does not match)'
+    - 'UnsupportedClassVersionError'
+    - 'protocol version not supported'
+  meaning: >
+    Two components disagree about the version they are speaking. Common right
+    after a partial upgrade where one piece moved and another did not.
+  causes:
+    - Application and database schema upgraded out of step
+    - Client and server on different protocol or API versions
+    - Code compiled for a newer runtime than the one installed
+  checks:
+    - Compare the deployed versions of every component involved
+    - Check whether a migration was skipped or half-applied
+    - Confirm the installed runtime version matches the build target
+
+- id: shutdown-in-progress
+  title: Service is shutting down or restarting
+  category: lifecycle
+  severity: low
+  confidence: 0.8
+  cascade: true
+  patterns:
+    - 'shutting down|shutdown (initiated|hook|in progress)'
+    - 'received (SIGTERM|SIGINT)'
+    - 'graceful shutdown'
+    - 'Stopping (service|application|server)'
+    - 'ApplicationContext .{0,40}clos(ing|ed)'
+  meaning: >
+    The service was asked to stop. Errors logged around a shutdown are usually
+    in-flight work being abandoned rather than genuine faults - but an
+    unexpected shutdown is itself worth explaining.
+  causes:
+    - Planned restart, deployment or scale-down
+    - Orchestrator (Kubernetes, systemd, Windows SCM) restarting an unhealthy instance
+    - Host being patched or rebooted
+  checks:
+    - Confirm whether a deployment or restart was scheduled at that time
+    - If unexpected, look for a failing health check or an OOM kill just before
+    - Errors immediately after this line are likely consequences, not causes

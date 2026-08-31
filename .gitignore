@@ -1,0 +1,20 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# Never commit real customer logs.
+*.log
+!tests/sample_logs/*.log
+uploads/
+
+.DS_Store
+.idea/
+.vscode/

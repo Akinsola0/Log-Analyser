@@ -1,0 +1,591 @@
+# Infrastructure, network, storage and database failures.
+# Each rule explains what the error means in plain English, why it usually
+# happens, and what to check next. Add your own in a separate file - see
+# rules/README.md.
+
+- id: jvm-heap-oom
+  title: JVM ran out of heap memory
+  category: resource
+  severity: critical
+  confidence: 0.95
+  patterns:
+    - 'java\.lang\.OutOfMemoryError'
+    - 'OutOfMemoryError: (Java heap space|GC overhead limit exceeded)'
+  meaning: >
+    The Java process asked for more memory than its heap allows and could not
+    continue. Once this happens the process is usually in an unreliable state -
+    threads die at arbitrary points, so any errors logged after it are likely
+    consequences rather than new problems.
+  causes:
+    - Heap size (-Xmx) too small for the current workload
+    - A memory leak - objects held in a cache or collection that is never cleared
+    - A single oversized request (large file, unbounded query result) loaded into memory
+  checks:
+    - Find the first OutOfMemoryError in the log; everything after it is suspect
+    - Compare -Xmx against the container/host memory limit
+    - Look for a heap dump (java_pid*.hprof) if -XX:+HeapDumpOnOutOfMemoryError is set
+    - Check whether the error repeats under specific requests or grows over time
+
+- id: linux-oom-killer
+  title: The operating system killed the process to reclaim memory
+  category: resource
+  severity: critical
+  confidence: 0.95
+  patterns:
+    - 'Out of memory: Kill(ed)? process'
+    - 'oom-kill(er)?:'
+    - 'Memory cgroup out of memory'
+  meaning: >
+    The host or container ran out of physical memory and the kernel chose this
+    process to terminate. The application did not crash on its own - it was
+    killed from outside, so its own log usually just stops mid-sentence.
+  causes:
+    - Container memory limit lower than what the application actually needs
+    - Another process on the same host consuming memory
+    - A memory leak growing until the limit is reached
+  checks:
+    - Confirm the container/pod memory limit against actual usage at the time
+    - Check whether the application log simply stops with no shutdown message
+    - Look for a restart immediately afterwards (a crash loop)
+
+- id: disk-full
+  title: Disk or volume is full
+  category: resource
+  severity: critical
+  confidence: 0.95
+  patterns:
+    - 'No space left on device'
+    - 'ENOSPC'
+    - 'disk (is )?full'
+    - 'There is not enough space on the disk'
+    - 'insufficient disk space'
+  meaning: >
+    A write failed because the filesystem has no free space. This tends to
+    produce a wide spread of unrelated-looking errors at once, because
+    logging, temp files, caches and database writes all fail together.
+  causes:
+    - Log files or temp files growing without rotation
+    - A large upload, export or backup filling the volume
+    - Old releases or container images never cleaned up
+  checks:
+    - Run df -h (or check disk usage on the Windows volume) for the affected mount
+    - Check log rotation is configured and actually running
+    - Look for the largest directories - du -sh /* or equivalent
+    - Note that inodes can be exhausted even when space appears free (df -i)
+
+- id: too-many-open-files
+  title: Process hit its open file/socket limit
+  category: resource
+  severity: high
+  confidence: 0.9
+  patterns:
+    - 'Too many open files'
+    - 'EMFILE'
+    - 'socket: too many open files'
+  meaning: >
+    The process reached the maximum number of file descriptors it is allowed.
+    Sockets count as file descriptors, so this usually shows up as a sudden
+    inability to accept connections rather than a file problem.
+  causes:
+    - Connections or file handles opened but never closed (a leak)
+    - ulimit -n set too low for the connection volume
+    - A traffic spike opening more sockets than usual
+  checks:
+    - Check the process limit - cat /proc/<pid>/limits
+    - Count actual open handles - ls /proc/<pid>/fd | wc -l
+    - Look for code paths that open resources without a finally/using/with block
+
+- id: connection-refused
+  title: Connection refused by the target host
+  category: network
+  severity: high
+  confidence: 0.9
+  patterns:
+    - 'Connection refused'
+    - 'ECONNREFUSED'
+    - 'No connection could be made because the target machine actively refused it'
+  meaning: >
+    The network reached the target machine, but nothing was listening on that
+    port. This is a definite answer from the other side - it is not a timeout
+    or a firewall drop. Whatever you were calling is down, or is listening
+    somewhere else.
+  causes:
+    - The target service is stopped, crashed, or still starting up
+    - Wrong port or wrong hostname in configuration
+    - The service is bound to 127.0.0.1 and cannot be reached from another host
+  checks:
+    - Confirm the target service is running and healthy
+    - Verify the host and port in configuration against where the service listens
+    - Test directly - telnet <host> <port> or curl -v
+    - Check the target's own log for a crash at the same timestamp
+
+- id: connection-timeout
+  title: Connection or read timed out
+  category: network
+  severity: high
+  confidence: 0.75
+  cascade: true
+  patterns:
+    - 'Connect(ion)? timed out'
+    - 'Read timed out'
+    - 'ETIMEDOUT'
+    - 'SocketTimeoutException'
+    - 'Timeout expired'
+    - 'The operation has timed out'
+    - 'context deadline exceeded'
+  meaning: >
+    The call was sent but no response arrived within the allowed time. Unlike
+    a refused connection, this means either the request never reached the
+    target, or the target is alive but too slow to answer. Timeouts often
+    appear in bulk as a downstream symptom of one slow component.
+  causes:
+    - The downstream service is overloaded or blocked on its own dependency
+    - A firewall or security group silently dropping packets
+    - Timeout configured too aggressively for a genuinely slow operation
+    - Network latency or packet loss between the two hosts
+  checks:
+    - Look for what else failed in the same seconds - the shared dependency is the suspect
+    - Check the downstream service's own log and response times for that window
+    - Confirm the configured timeout is realistic for the operation
+    - Test connectivity from the same host that logged the error
+
+- id: connection-reset
+  title: Connection reset or broken pipe
+  category: network
+  severity: medium
+  confidence: 0.8
+  cascade: true
+  patterns:
+    - 'Connection reset( by peer)?'
+    - 'ECONNRESET'
+    - 'Broken pipe'
+    - 'An existing connection was forcibly closed'
+  meaning: >
+    The other end closed the connection abruptly while data was still being
+    exchanged. Usually the remote side gave up, restarted, or a device in the
+    middle (load balancer, proxy, firewall) dropped an idle connection.
+  causes:
+    - The remote service restarted or crashed mid-request
+    - A load balancer or proxy idle timeout shorter than the connection pool's
+    - Client cancelled the request (user closed browser / navigated away)
+  checks:
+    - Check whether the remote service restarted at that timestamp
+    - Compare the load balancer idle timeout against your connection pool max lifetime
+    - If it correlates with user traffic, it may be harmless client cancellation
+
+- id: dns-failure
+  title: Hostname could not be resolved
+  category: network
+  severity: high
+  confidence: 0.9
+  patterns:
+    - 'UnknownHostException'
+    - 'Name or service not known'
+    - 'Temporary failure in name resolution'
+    - 'getaddrinfo (ENOTFOUND|EAI_AGAIN)'
+    - 'No such host is known'
+    - 'nodename nor servname provided'
+  meaning: >
+    DNS lookup for the hostname failed, so no connection was ever attempted.
+    The problem is name resolution, not the target service - the target may
+    be perfectly healthy.
+  causes:
+    - Typo in the configured hostname
+    - DNS server unreachable, or resolv.conf / DNS settings wrong
+    - An internal-only name being resolved from outside the network
+    - In containers - service name used before the DNS entry exists
+  checks:
+    - Resolve the name from the affected host - nslookup or dig
+    - Compare the hostname in config against the actual DNS record
+    - Check the DNS servers configured on that host are reachable
+
+- id: network-unreachable
+  title: Network or host unreachable
+  category: network
+  severity: high
+  confidence: 0.85
+  patterns:
+    - 'Network is unreachable'
+    - 'No route to host'
+    - 'EHOSTUNREACH'
+    - 'ENETUNREACH'
+  meaning: >
+    There is no network path to the target at all. Routing, not the
+    application, is the problem.
+  causes:
+    - Missing route, VPN down, or the host is on a different network segment
+    - Firewall or security group blocking the subnet
+    - Target host powered off or its IP changed
+  checks:
+    - ping / traceroute the target from the affected host
+    - Review firewall, security group and routing table changes around that time
+
+- id: tls-cert-expired
+  title: TLS certificate has expired or is not yet valid
+  category: security
+  severity: critical
+  confidence: 0.95
+  patterns:
+    - 'certificate (has )?expired'
+    - 'CertificateExpiredException'
+    - 'NotAfter'
+    - 'certificate is not yet valid'
+    - 'CERT_HAS_EXPIRED'
+  meaning: >
+    The TLS certificate presented by the server is outside its validity dates,
+    so the connection was refused. This typically breaks everything at once at
+    a precise moment with no deployment involved - a strong clue on its own.
+  causes:
+    - Certificate reached its expiry date and was not renewed
+    - Automated renewal (ACME/Let's Encrypt) silently failing
+    - Server clock wrong, making a valid certificate look expired
+  checks:
+    - Check the certificate dates - openssl s_client -connect host:443 | openssl x509 -noout -dates
+    - Verify the system clock and NTP sync on both ends
+    - Check the renewal job's own logs
+
+- id: tls-handshake-failure
+  title: TLS handshake failed
+  category: security
+  severity: high
+  confidence: 0.85
+  patterns:
+    - 'SSLHandshakeException'
+    - 'handshake( |_)fail'
+    - 'unable to find valid certification path'
+    - 'PKIX path building failed'
+    - 'SSL(_ERROR|V3)_[A-Z_]*ALERT'
+    - 'certificate verify failed'
+    - 'self.signed certificate'
+    - 'wrong version number'
+  meaning: >
+    The two sides could not agree on a secure connection. Either the client
+    does not trust the server's certificate chain, or they share no common
+    protocol version or cipher.
+  causes:
+    - Server certificate signed by a CA the client's truststore does not contain
+    - Missing intermediate certificate in the server's chain
+    - One side disabled older TLS versions the other still requires
+    - Self-signed certificate used without being explicitly trusted
+  checks:
+    - Inspect the full chain the server sends - openssl s_client -showcerts
+    - Confirm the CA / intermediate is present in the client truststore
+    - Compare enabled TLS versions and ciphers on both sides
+    - Check whether this started right after a certificate rotation or upgrade
+
+- id: tls-hostname-mismatch
+  title: Certificate does not match the hostname
+  category: security
+  severity: high
+  confidence: 0.9
+  patterns:
+    - 'hostname .{0,80}(does not match|verification failed)'
+    - 'No subject alternative names'
+    - 'CertificateNameMismatch'
+    - 'ERR_CERT_COMMON_NAME_INVALID'
+  meaning: >
+    The certificate is valid but was issued for a different name than the one
+    being connected to, so the client rejected it.
+  causes:
+    - Connecting by IP address or an alias not listed in the certificate SANs
+    - Certificate issued for the external name but used on an internal one
+    - Load balancer presenting its own certificate instead of the app's
+  checks:
+    - List the certificate's SANs and compare to the URL in configuration
+    - Decide whether to fix the URL or reissue the certificate with the right SAN
+
+- id: db-pool-exhausted
+  title: Database connection pool exhausted
+  category: database
+  severity: critical
+  confidence: 0.9
+  patterns:
+    - 'Connection is not available, request timed out after'
+    - 'HikariPool-\d+ - Connection is not available'
+    - 'pool (is )?exhaust'
+    - 'Timeout waiting for (idle object|connection from pool)'
+    - 'unable to obtain (isolated )?JDBC connection'
+    - 'TooManyConnections'
+  meaning: >
+    Every connection in the pool was already in use and a new request waited
+    past its timeout. The database itself may be perfectly healthy - the
+    bottleneck is that connections are not being returned fast enough.
+  causes:
+    - Slow queries holding connections far longer than expected
+    - Connections leaked - not closed on an error path
+    - Pool size too small for the concurrency, or a traffic spike
+    - A downstream lock or deadlock stalling transactions
+  checks:
+    - Look for slow query warnings just before the first pool timeout
+    - Compare pool max size against peak concurrent requests
+    - Check the database's own active-session count for that window
+    - Look for a long-running transaction holding connections open
+
+- id: db-too-many-connections
+  title: Database rejected the connection - server-side limit reached
+  category: database
+  severity: critical
+  confidence: 0.9
+  patterns:
+    - 'remaining connection slots are reserved'
+    - 'sorry, too many clients already'
+    - 'Too many connections'
+    - 'ORA-00020'
+    - 'max_connections'
+  meaning: >
+    The database server itself is at its configured connection limit and is
+    refusing new sessions. This affects every client at once, not just the
+    application that logged it.
+  causes:
+    - Combined pool sizes across all app instances exceed the server limit
+    - Connections leaked by one client, starving the rest
+    - An extra consumer (reporting tool, migration, admin session) taking slots
+  checks:
+    - Compare total configured pool sizes across all instances against max_connections
+    - List current sessions on the server and see which client owns most of them
+    - Look for idle-in-transaction sessions that never got closed
+
+- id: db-deadlock
+  title: Database deadlock - transaction was rolled back
+  category: database
+  severity: high
+  confidence: 0.9
+  patterns:
+    - 'deadlock detected'
+    - 'was deadlocked on lock resources'
+    - 'Deadlock found when trying to get lock'
+    - 'ORA-00060'
+    - 'DeadlockLoserDataAccessException'
+  meaning: >
+    Two transactions each held a lock the other needed, so the database picked
+    one and killed it to break the tie. The chosen transaction's work was
+    undone - the user's action silently failed or was rolled back.
+  causes:
+    - Two code paths updating the same rows in a different order
+    - Long transactions holding locks while doing slow work
+    - Missing index causing a wider lock than intended
+  checks:
+    - Identify the two statements involved from the database's deadlock report
+    - Check whether the operations can take locks in a consistent order
+    - Look for retry logic - deadlocks are expected occasionally and should be retried
+
+- id: db-constraint-violation
+  title: Database rejected the write - constraint violation
+  category: database
+  severity: medium
+  confidence: 0.85
+  patterns:
+    - 'duplicate key value violates unique constraint'
+    - 'Duplicate entry .{0,80} for key'
+    - 'ConstraintViolationException'
+    - 'ORA-00001'
+    - 'violates foreign key constraint'
+    - 'Cannot insert duplicate key row'
+  meaning: >
+    The data being written broke a rule defined on the table - a duplicate
+    unique value, or a reference to a row that does not exist. This is a data
+    or logic problem, not an outage.
+  causes:
+    - The same request submitted twice (double click, retry after a timeout)
+    - Missing existence check before insert
+    - Data imported out of order, so a referenced row is not there yet
+  checks:
+    - Identify the constraint name in the message and the table it belongs to
+    - Check whether a retry after a timeout caused a duplicate submission
+    - Decide whether the operation should be an upsert instead of an insert
+
+- id: db-auth-failed
+  title: Database authentication failed
+  category: database
+  severity: critical
+  confidence: 0.9
+  patterns:
+    - 'password authentication failed for user'
+    - 'Access denied for user'
+    - 'Login failed for user'
+    - 'ORA-01017'
+    - 'authentication failed.{0,40}(database|SQL)'
+  meaning: >
+    The database rejected the credentials. Nothing will work until this is
+    fixed, and it usually appears immediately after a change rather than
+    gradually.
+  causes:
+    - Password rotated without updating the application's configuration or secret
+    - Wrong user, wrong database, or wrong environment's connection string
+    - Account locked, expired, or missing the required grant
+  checks:
+    - Confirm which user and database the connection string points at
+    - Check whether a credential rotation happened just before the first failure
+    - Verify the account is not locked or expired on the server
+
+- id: permission-denied
+  title: Permission denied on a file or resource
+  category: config
+  severity: high
+  confidence: 0.8
+  patterns:
+    - 'Permission denied'
+    - 'EACCES'
+    - 'Access is denied'
+    - 'AccessDeniedException'
+    - 'UnauthorizedAccessException'
+  meaning: >
+    The operating system refused the operation because the account running the
+    process lacks rights to that path or resource. The application logic is
+    fine - the environment is not set up for it.
+  causes:
+    - Service running as a different user than the one that owns the files
+    - Permissions changed by a deployment, backup or security hardening job
+    - SELinux/AppArmor policy, or a read-only mount
+  checks:
+    - Identify which account the service runs as and the owner of the target path
+    - Compare permissions against a working environment
+    - Check whether a deployment or security change coincided with the first failure
+
+- id: read-only-filesystem
+  title: Filesystem is mounted read-only
+  category: resource
+  severity: critical
+  confidence: 0.9
+  patterns:
+    - 'Read-only file system'
+    - 'EROFS'
+  meaning: >
+    The filesystem has been remounted read-only, which Linux does
+    automatically when it detects disk corruption or I/O errors. Treat this as
+    a hardware or storage fault, not an application bug.
+  causes:
+    - Underlying disk errors caused the kernel to protect the filesystem
+    - Storage backend (SAN/NFS/EBS) became unavailable
+    - Deliberately read-only container filesystem with no writable volume mounted
+  checks:
+    - Check kernel/system logs for I/O errors just before this appeared
+    - Run mount to confirm the flags on the affected filesystem
+    - Treat data written shortly before this as suspect
+
+- id: port-in-use
+  title: Port already in use - service could not start
+  category: config
+  severity: high
+  confidence: 0.95
+  patterns:
+    - 'Address already in use'
+    - 'EADDRINUSE'
+    - 'Only one usage of each socket address'
+    - 'Web server failed to start.{0,60}[Pp]ort .{0,20}was already in use'
+  meaning: >
+    The service tried to bind a port that another process already holds, so it
+    exited during startup. Nothing it does afterwards will work because it
+    never came up.
+  causes:
+    - The previous instance did not shut down fully before the new one started
+    - Two services configured on the same port
+    - An orphaned process still holding the port
+  checks:
+    - Find the holder - ss -lptn 'sport = :<port>' or netstat -ano | findstr :<port>
+    - Confirm the old instance stopped before the restart
+    - Check for a duplicate port in configuration
+
+- id: gateway-timeout
+  title: Gateway or proxy returned 502/503/504
+  category: network
+  severity: high
+  confidence: 0.8
+  cascade: true
+  patterns:
+    - '\b(502|504)\b.{0,40}(Bad Gateway|Gateway Time-?out)'
+    - 'upstream (timed out|prematurely closed|sent invalid)'
+    - 'no live upstreams'
+    - '503 Service (Temporarily )?Unavailable'
+  meaning: >
+    A proxy or load balancer could not get a usable response from the service
+    behind it. The error is reported by the proxy, so the real failure is in
+    the upstream application - look at its log for the same timestamp.
+  causes:
+    - Upstream application crashed, restarted, or is not listening
+    - Upstream slower than the proxy's timeout
+    - Health checks failing so the load balancer has no healthy targets
+  checks:
+    - Open the upstream service's own log for that exact window
+    - Check health check status and how many targets were in service
+    - Compare the proxy timeout against actual upstream response times
+
+- id: host-auth-failure
+  title: Host login authentication failure
+  category: security
+  severity: medium
+  confidence: 0.85
+  patterns:
+    - 'Failed password for'
+    - 'authentication failure;.{0,80}user='
+    - 'Invalid user .{0,40} from'
+    - 'pam_unix\(.{0,30}\): authentication failure'
+    - 'error: maximum authentication attempts exceeded'
+    - 'Failed publickey for'
+  meaning: >
+    A login to the host itself was rejected. One or two of these are normal
+    noise; a sustained run of them from a single source is either a
+    misconfigured client retrying stale credentials or a brute-force attempt.
+  causes:
+    - A script, backup job or mounted share using an old password
+    - Account password rotated without updating everything that uses it
+    - Automated brute-force scanning against an internet-exposed SSH port
+  checks:
+    - Count attempts per source address and per account over the window
+    - Identify whether the source is one of your own systems or an unknown host
+    - If unknown and sustained, restrict the port and review exposure
+
+- id: slow-query
+  title: Slow query - a database call took far longer than expected
+  category: database
+  severity: high
+  confidence: 0.85
+  patterns:
+    - 'slow query'
+    - 'query took \d+'
+    - 'long.running (query|transaction|statement)'
+    - 'execution time.{0,20}exceeded'
+    - 'Query exceeded .{0,30}threshold'
+  meaning: >
+    A single database call ran long enough for the application to complain
+    about it. On its own this is a performance warning, but it is often the
+    first visible sign of a bigger failure: slow queries hold connections,
+    connections run out, and everything downstream then times out. If you see
+    these shortly before a wave of errors, start here.
+  causes:
+    - A missing or unused index, so the database is scanning instead of seeking
+    - Table or statistics growth changing the query plan
+    - Lock contention making the query wait rather than work
+    - A query returning far more rows than it needs to
+  checks:
+    - Note the exact statement named and get its execution plan
+    - Check whether these warnings started before the first error in the log
+    - Compare the query's timing against its normal baseline
+    - Look for a recent data volume change or a missing index
+
+- id: thread-starvation
+  title: Thread starvation or a stalled event loop
+  category: resource
+  severity: high
+  confidence: 0.85
+  patterns:
+    - 'thread starvation'
+    - 'clock leap detected'
+    - 'event loop (blocked|lag)'
+    - 'blocked thread'
+    - 'has been blocked for \d+'
+  meaning: >
+    A pool's housekeeping noticed that its threads were not getting scheduled
+    on time. Either the machine is genuinely CPU-starved, threads are all
+    blocked waiting on something slow, or a long garbage-collection pause
+    froze the process. This is usually an early warning that appears shortly
+    before pool timeouts and cascading failures.
+  causes:
+    - Threads blocked on a slow downstream call or database query
+    - CPU saturation on the host, or a noisy neighbour on shared hardware
+    - A long garbage collection pause stopping the world
+    - A virtual machine being paused or migrated (the "clock leap" case)
+  checks:
+    - Look at what happens in the log immediately after this warning
+    - Check CPU usage and GC pause times for that window
+    - Take a thread dump if it is still happening, to see what threads are waiting on

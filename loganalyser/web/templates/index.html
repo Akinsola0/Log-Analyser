@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log Analyser</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='report.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>Log Analyser</h1>
+    <span class="sub">{{ rule_count }} error signatures loaded &middot; runs locally, nothing is uploaded anywhere</span>
+  </header>
+
+  <div id="drop">
+    <strong>Drop a log file here, or click to choose one</strong>
+    <span>Plain text app logs, syslog, or Windows Event Log exports (.log .txt .csv .xml) &middot; up to {{ max_mb }}MB</span>
+    <input type="file" id="file" class="hidden" accept=".log,.txt,.csv,.xml,.out,.err,text/*">
+  </div>
+
+  <div class="controls">
+    <select id="format" title="Log format">
+      <option value="auto">Detect format automatically</option>
+      <option value="plaintext">Plain text application log</option>
+      <option value="syslog">Syslog</option>
+      <option value="winevent">Windows Event Log export</option>
+    </select>
+    <button class="link" id="toggle-paste">or paste log text</button>
+    <label class="check" title="{{ ai_status.detail }}">
+      <input type="checkbox" id="use-ai" {% if not ai_status.available %}disabled{% endif %}>
+      Explain unknown errors with AI
+    </label>
+    <button class="primary" id="run" disabled>Analyse</button>
+  </div>
+  <div class="hint">{{ ai_status.detail }}</div>
+
+  <div id="paste-area" class="hidden" style="margin-top:12px">
+    <textarea id="text" placeholder="Paste log lines here..." spellcheck="false"></textarea>
+  </div>
+
+  <div id="actions" class="actions hidden">
+    <button class="secondary" id="download">Download report (single HTML file)</button>
+    <span class="hint" style="margin:0">Self-contained &mdash; opens with no server, and can be emailed or archived.</span>
+  </div>
+
+  <div id="error" class="panel pad error-box hidden"></div>
+  <div id="results" class="hidden"></div>
+
+</div>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

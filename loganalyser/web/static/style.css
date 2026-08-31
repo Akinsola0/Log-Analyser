@@ -1,0 +1,25 @@
+/* Web app shell only. Report styling lives in report.css, which is shared
+   with exported standalone reports. */
+#drop {
+  margin-top: 18px; padding: 30px 20px; text-align: center; cursor: pointer;
+  border: 1.5px dashed var(--border); border-radius: var(--radius);
+  background: var(--panel); transition: border-color .15s, background .15s;
+}
+#drop.over { border-color: var(--accent); background: rgba(47,111,237,.06); }
+#drop strong { display: block; font-size: 16px; margin-bottom: 4px; }
+#drop span { color: var(--muted); font-size: 13px; }
+.controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+select, button, textarea, input[type=search] {
+  font: inherit; color: var(--text); background: var(--panel);
+  border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px;
+}
+button.primary { background: var(--accent); color: #fff; border-color: transparent; cursor: pointer; font-weight: 600; }
+button.primary:disabled { opacity: .55; cursor: default; }
+button.link { background: none; border: none; color: var(--accent); cursor: pointer; padding: 4px 0; }
+button.secondary { cursor: pointer; }
+textarea { width: 100%; min-height: 130px; resize: vertical; }
+.error-box { border-left: 4px solid var(--critical); margin-top: 18px; }
+.spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid rgba(127,127,127,.3);
+  border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -2px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.actions { display: flex; gap: 10px; align-items: center; margin-top: 14px; flex-wrap: wrap; }

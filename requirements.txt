@@ -1,0 +1,5 @@
+Flask>=3.0
+PyYAML>=6.0
+
+# Optional - only needed for the "explain unknown errors with AI" feature.
+# anthropic>=0.40
