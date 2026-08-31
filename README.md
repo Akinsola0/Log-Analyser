@@ -32,12 +32,25 @@ written to disk.
 
 ## Quick start
 
+**Windows:** double-click `start-windows.bat`.
+**macOS / Linux:** run `./start-mac-linux.sh`.
+
+Either one sets up a virtual environment on first run, installs the two
+dependencies, and opens the app. Later runs start immediately.
+
+To do it by hand instead:
+
 ```bash
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 python run.py
 ```
 
 Then open <http://127.0.0.1:5000> and drop in a log file.
+
+Needs Python 3.8 or newer. On Windows, tick **"Add Python to PATH"** in the
+installer — most setup problems trace back to that box being left unticked.
 
 There's also a command-line version, for when you're on a server:
 
