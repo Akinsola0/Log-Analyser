@@ -32,14 +32,14 @@ export function PhotoTile({
     <div
       aria-hidden
       className={cn(
-        "bg-brand-navy text-brand-navy-foreground flex items-center justify-center gap-2 rounded-lg",
+        "from-brand-from/25 via-brand-via/20 to-brand-to/25 text-foreground flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-linear-140",
         className,
       )}
     >
       {category ? (
-        <CategoryIcon name={category} className="size-5 opacity-70" />
+        <CategoryIcon name={category} className="size-5 opacity-80" />
       ) : null}
-      <span className="text-lg font-semibold tracking-tight">{initials}</span>
+      <span className="display text-xl">{initials}</span>
       <span className="sr-only">{categories?.join(", ")}</span>
     </div>
   );

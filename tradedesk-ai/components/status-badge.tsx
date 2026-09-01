@@ -36,10 +36,10 @@ import {
 const base = "border font-medium";
 
 const leadStatusStyles: Record<LeadStatus, string> = {
-  new: "border-blue-200 bg-blue-50 text-blue-700",
-  qualified: "border-violet-200 bg-violet-50 text-violet-700",
-  booked: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  lost: "border-neutral-200 bg-neutral-100 text-neutral-600",
+  new: "border-sky-400/30 bg-sky-400/10 text-sky-200",
+  qualified: "border-violet-400/30 bg-violet-400/10 text-violet-200",
+  booked: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
+  lost: "border-white/12 bg-white/5 text-white/55",
 };
 
 export function LeadStatusBadge({ status }: { status: LeadStatus }) {
@@ -51,10 +51,10 @@ export function LeadStatusBadge({ status }: { status: LeadStatus }) {
 }
 
 const jobStatusStyles: Record<JobStatus, string> = {
-  booked: "border-blue-200 bg-blue-50 text-blue-700",
-  confirmed: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  completed: "border-neutral-200 bg-neutral-100 text-neutral-600",
-  cancelled: "border-red-200 bg-red-50 text-red-700",
+  booked: "border-sky-400/30 bg-sky-400/10 text-sky-200",
+  confirmed: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
+  completed: "border-white/12 bg-white/5 text-white/55",
+  cancelled: "border-red-400/35 bg-red-400/10 text-red-200",
 };
 
 export function JobStatusBadge({ status }: { status: JobStatus }) {
@@ -66,11 +66,11 @@ export function JobStatusBadge({ status }: { status: JobStatus }) {
 }
 
 const callOutcomeStyles: Record<CallOutcome, string> = {
-  booked: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  lead_only: "border-blue-200 bg-blue-50 text-blue-700",
-  callback_required: "border-amber-300 bg-amber-50 text-amber-800",
-  spam: "border-neutral-200 bg-neutral-100 text-neutral-600",
-  failed: "border-red-200 bg-red-50 text-red-700",
+  booked: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
+  lead_only: "border-sky-400/30 bg-sky-400/10 text-sky-200",
+  callback_required: "border-amber-400/30 bg-amber-400/10 text-amber-200",
+  spam: "border-white/12 bg-white/5 text-white/55",
+  failed: "border-red-400/35 bg-red-400/10 text-red-200",
 };
 
 export function CallOutcomeBadge({
@@ -91,9 +91,10 @@ export function CallOutcomeBadge({
 }
 
 const leadSourceStyles: Record<LeadSource, string> = {
-  phone: "border-sky-200 bg-sky-50 text-sky-700",
-  marketplace: "border-brand-amber/50 bg-amber-50 text-amber-800",
-  manual: "border-neutral-200 bg-neutral-100 text-neutral-600",
+  phone: "border-sky-400/30 bg-sky-400/10 text-sky-200",
+  // Marketplace leads wear the brand accent — they came from our own funnel.
+  marketplace: "border-brand-to/45 bg-brand-to/12 text-pink-200",
+  manual: "border-white/12 bg-white/5 text-white/55",
 };
 
 const leadSourceIcons: Record<LeadSource, typeof Phone> = {
@@ -113,9 +114,9 @@ export function LeadSourceBadge({ source }: { source: LeadSource }) {
 }
 
 const urgencyStyles: Record<LeadUrgency, string> = {
-  emergency: "border-red-200 bg-red-50 text-red-700",
-  urgent: "border-amber-300 bg-amber-50 text-amber-800",
-  routine: "border-neutral-200 bg-neutral-100 text-neutral-600",
+  emergency: "border-red-400/40 bg-red-400/12 text-red-200",
+  urgent: "border-amber-400/30 bg-amber-400/10 text-amber-200",
+  routine: "border-white/12 bg-white/5 text-white/55",
 };
 
 export function UrgencyBadge({ urgency }: { urgency: LeadUrgency }) {
@@ -127,10 +128,10 @@ export function UrgencyBadge({ urgency }: { urgency: LeadUrgency }) {
 }
 
 const messageStatusStyles: Record<MessageStatus, string> = {
-  queued: "border-amber-300 bg-amber-50 text-amber-800",
-  sent: "border-blue-200 bg-blue-50 text-blue-700",
-  delivered: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  failed: "border-red-200 bg-red-50 text-red-700",
+  queued: "border-amber-400/30 bg-amber-400/10 text-amber-200",
+  sent: "border-sky-400/30 bg-sky-400/10 text-sky-200",
+  delivered: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
+  failed: "border-red-400/35 bg-red-400/10 text-red-200",
 };
 
 export function MessageStatusBadge({ status }: { status: MessageStatus }) {

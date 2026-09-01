@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 
 import { CategoryIcon } from "@/components/marketing/category-icon";
 import { formatEuro } from "@/lib/format";
@@ -19,42 +20,53 @@ export function CategoryGrid({
   return (
     <section
       id="browse"
-      className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 md:py-20"
+      className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-8 md:py-24"
     >
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            Browse by trade
-          </h2>
-          <p className="text-muted-foreground mt-2 max-w-2xl">
-            Indicative prices from tradespeople on TradeDesk AI. Real quote
+          <p className="kicker text-muted-foreground">The marketplace</p>
+          <h2 className="display mt-3 text-4xl sm:text-5xl">Browse by trade</h2>
+          <p className="text-muted-foreground mt-4 max-w-2xl">
+            Indicative prices from tradespeople on TradeDesk AI. The real quote
             comes from them — but you shouldn&apos;t have to ring five people to
             find out the going rate.
           </p>
         </div>
         <Link
           href="/find"
-          className="text-primary rounded text-sm font-medium underline-offset-4 hover:underline"
+          className="text-foreground group inline-flex items-center gap-1.5 rounded text-sm font-semibold tracking-wide uppercase underline-offset-4 hover:underline"
         >
-          See all trades and towns
+          All trades and towns
+          <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </Link>
       </div>
 
-      <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {categories.map((category) => (
           <li key={category.slug}>
             <Link
               href={`/find/${category.slug}/${defaultLocation}`}
-              className="group bg-card hover:border-primary/40 flex h-full flex-col gap-2 rounded-xl border p-4 transition-colors"
+              className="group hover:border-brand-via/40 relative flex h-full flex-col gap-3 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-5 transition-colors"
             >
-              <span className="bg-accent text-accent-foreground flex size-10 items-center justify-center rounded-lg">
-                <CategoryIcon name={category.icon} className="size-5" />
+              <span
+                aria-hidden
+                className="brand-glow pointer-events-none absolute -top-16 -right-10 h-32 w-32 opacity-0 transition-opacity group-hover:opacity-60"
+              />
+              <span className="text-brand-via relative">
+                <CategoryIcon name={category.icon} className="size-6" />
               </span>
-              <span className="mt-1 font-medium">{category.label}</span>
-              <span className="text-muted-foreground text-sm">
-                From {formatEuro(category.from_price_cents)}
+              <span className="relative mt-2 font-semibold">
+                {category.label}
               </span>
-              <span className="text-muted-foreground mt-auto pt-2 text-xs">
+              <span className="relative">
+                <span className="kicker text-muted-foreground block text-[0.6rem]">
+                  From
+                </span>
+                <span className="display mt-1 block text-2xl">
+                  {formatEuro(category.from_price_cents)}
+                </span>
+              </span>
+              <span className="text-muted-foreground relative mt-auto pt-2 text-xs">
                 {category.listing_count} verified{" "}
                 {category.plural.toLowerCase()}
               </span>

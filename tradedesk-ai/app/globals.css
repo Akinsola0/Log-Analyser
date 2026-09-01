@@ -5,45 +5,54 @@
 
 /*
   TradeDesk AI design tokens.
-  One polished light theme (see docs/api-contract.md > "Theming" for the rationale):
-  navy primary for the trade/B2B surfaces, hi-vis amber as the single accent.
+
+  One polished dark theme: a near-black warmed towards red, a single hot
+  crimson-to-magenta accent kept for emphasis and glow, and oversized uppercase
+  display type. Light surfaces are used deliberately, as inverted sections, to
+  break up a long page.
 */
 :root {
-  --radius: 0.625rem;
+  --radius: 1.25rem;
 
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.21 0.03 256);
+  --background: oklch(0.145 0.022 8);
+  --foreground: oklch(0.97 0.004 20);
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.21 0.03 256);
+  /* Cards sit just above the page, never pure grey. */
+  --card: oklch(0.185 0.021 8);
+  --card-foreground: oklch(0.97 0.004 20);
 
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.21 0.03 256);
+  --popover: oklch(0.2 0.021 8);
+  --popover-foreground: oklch(0.97 0.004 20);
 
-  --primary: oklch(0.45 0.15 258);
-  --primary-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.63 0.24 12);
+  --primary-foreground: oklch(0.99 0 0);
 
-  --secondary: oklch(0.968 0.007 248);
-  --secondary-foreground: oklch(0.28 0.04 257);
+  --secondary: oklch(0.24 0.022 8);
+  --secondary-foreground: oklch(0.95 0.004 20);
 
-  --muted: oklch(0.968 0.007 248);
-  --muted-foreground: oklch(0.52 0.02 257);
+  --muted: oklch(0.24 0.022 8);
+  --muted-foreground: oklch(0.7 0.02 12);
 
-  --accent: oklch(0.962 0.035 92);
-  --accent-foreground: oklch(0.38 0.07 68);
+  --accent: oklch(0.62 0.26 348);
+  --accent-foreground: oklch(0.99 0 0);
 
-  --destructive: oklch(0.58 0.22 27);
-  --destructive-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.63 0.24 18);
+  --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.923 0.008 250);
-  --input: oklch(0.923 0.008 250);
-  --ring: oklch(0.45 0.15 258);
+  --border: oklch(0.3 0.02 10);
+  --input: oklch(0.32 0.02 10);
+  --ring: oklch(0.63 0.24 12);
 
-  /* Brand extras used by the marketing site. */
-  --brand-navy: oklch(0.26 0.06 258);
-  --brand-navy-foreground: oklch(0.97 0.01 250);
-  --brand-amber: oklch(0.79 0.15 76);
-  --brand-amber-foreground: oklch(0.28 0.06 70);
+  /* The accent, as a gradient — hero, active states, chart fills, glow. */
+  --brand-from: oklch(0.66 0.24 30);
+  --brand-via: oklch(0.62 0.26 5);
+  --brand-to: oklch(0.6 0.26 340);
+
+  /* Inverted sections: light ground, dark ink. */
+  --invert-background: oklch(0.96 0.008 60);
+  --invert-foreground: oklch(0.18 0.02 12);
+  --invert-muted-foreground: oklch(0.48 0.02 14);
+  --invert-border: oklch(0.87 0.01 40);
 }
 
 @theme inline {
@@ -67,18 +76,24 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --color-brand-navy: var(--brand-navy);
-  --color-brand-navy-foreground: var(--brand-navy-foreground);
-  --color-brand-amber: var(--brand-amber);
-  --color-brand-amber-foreground: var(--brand-amber-foreground);
+  --color-brand-from: var(--brand-from);
+  --color-brand-via: var(--brand-via);
+  --color-brand-to: var(--brand-to);
+
+  --color-invert-background: var(--invert-background);
+  --color-invert-foreground: var(--invert-foreground);
+  --color-invert-muted-foreground: var(--invert-muted-foreground);
+  --color-invert-border: var(--invert-border);
 
   --font-sans: var(--font-geist-sans);
+  --font-display: var(--font-archivo);
   --font-mono: var(--font-geist-mono);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: calc(var(--radius) - 0.75rem);
+  --radius-md: calc(var(--radius) - 0.5rem);
+  --radius-lg: calc(var(--radius) - 0.25rem);
+  --radius-xl: var(--radius);
+  --radius-2xl: calc(var(--radius) + 0.5rem);
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
@@ -104,7 +119,7 @@
 
 @layer base {
   :root {
-    color-scheme: light;
+    color-scheme: dark;
   }
 
   * {
@@ -123,6 +138,76 @@
   /* Keyboard users must always be able to see where they are. */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-ring;
+  }
+
+  ::selection {
+    background: var(--brand-via);
+    color: white;
+  }
+}
+
+@layer components {
+  /*
+    Oversized uppercase display type — the loudest thing on any screen.
+    Sizes come from the caller; this fixes the face, weight and tracking.
+  */
+  .display {
+    font-family:
+      var(--font-display), var(--font-geist-sans), system-ui, sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+    line-height: 0.92;
+  }
+
+  /* Small letterspaced label that sits above a heading. */
+  .kicker {
+    @apply text-xs font-semibold tracking-[0.18em] uppercase;
+  }
+
+  /* The accent gradient, as text. */
+  .text-gradient {
+    background-image: linear-gradient(
+      100deg,
+      var(--brand-from),
+      var(--brand-via) 45%,
+      var(--brand-to)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Blueprint dot grid, used behind hero sections. */
+  .dot-grid {
+    background-image: radial-gradient(
+      color-mix(in oklab, var(--foreground) 16%, transparent) 1px,
+      transparent 1px
+    );
+    background-size: 28px 28px;
+  }
+
+  /* Soft bloom of accent light — the neon glow in the references. */
+  .brand-glow {
+    background: radial-gradient(
+      closest-side,
+      color-mix(in oklab, var(--brand-via) 55%, transparent),
+      transparent
+    );
+    filter: blur(48px);
+  }
+
+  /* An inverted (light) band inside the dark page. */
+  .section-invert {
+    background: var(--invert-background);
+    color: var(--invert-foreground);
+    --border: var(--invert-border);
+    --muted-foreground: var(--invert-muted-foreground);
+    --card: oklch(1 0 0);
+    --card-foreground: var(--invert-foreground);
+    --foreground: var(--invert-foreground);
+    --secondary: oklch(0.93 0.008 60);
+    --secondary-foreground: var(--invert-foreground);
   }
 }
 

@@ -18,11 +18,15 @@ const tradeLinks = [
 
 export function SiteFooter() {
   return (
-    <footer className="bg-brand-navy text-brand-navy-foreground mt-auto">
-      <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-4">
+    <footer className="relative mt-auto overflow-hidden border-t border-white/10">
+      <div
+        aria-hidden
+        className="brand-glow pointer-events-none absolute -bottom-40 left-1/2 h-80 w-[42rem] -translate-x-1/2 opacity-40"
+      />
+      <div className="relative mx-auto grid w-full max-w-7xl gap-10 px-4 py-16 sm:px-8 md:grid-cols-4">
         <div className="md:col-span-2">
-          <Logo tone="light" />
-          <p className="mt-3 max-w-sm text-sm text-white/70">
+          <Logo />
+          <p className="text-muted-foreground mt-4 max-w-sm text-sm">
             The AI front desk for Irish trades — and the marketplace where
             homeowners find them. Built in Ireland, for plumbers, electricians,
             handymen and everyone else who can&apos;t answer a phone with two
@@ -31,11 +35,14 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <h2 className="text-sm font-semibold">I need a tradesman</h2>
-          <ul className="mt-3 space-y-2 text-sm text-white/70">
+          <h2 className="kicker text-muted-foreground">I need a tradesman</h2>
+          <ul className="mt-4 space-y-2.5 text-sm">
             {homeownerLinks.map((link) => (
               <li key={link.href}>
-                <Link className="rounded hover:text-white" href={link.href}>
+                <Link
+                  className="text-muted-foreground hover:text-foreground rounded transition-colors"
+                  href={link.href}
+                >
                   {link.label}
                 </Link>
               </li>
@@ -44,11 +51,14 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <h2 className="text-sm font-semibold">I am a tradesman</h2>
-          <ul className="mt-3 space-y-2 text-sm text-white/70">
+          <h2 className="kicker text-muted-foreground">I am a tradesman</h2>
+          <ul className="mt-4 space-y-2.5 text-sm">
             {tradeLinks.map((link) => (
               <li key={link.href}>
-                <Link className="rounded hover:text-white" href={link.href}>
+                <Link
+                  className="text-muted-foreground hover:text-foreground rounded transition-colors"
+                  href={link.href}
+                >
                   {link.label}
                 </Link>
               </li>
@@ -57,8 +67,8 @@ export function SiteFooter() {
         </div>
       </div>
 
-      <div className="border-t border-white/10">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-6 text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="relative border-t border-white/10">
+        <div className="text-muted-foreground mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 py-6 text-xs sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <p>
             © {new Date().getFullYear()} TradeDesk AI. Registered in Ireland.
           </p>

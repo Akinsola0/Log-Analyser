@@ -27,22 +27,32 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-0 z-40 border-b backdrop-blur">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+    <header className="bg-background/70 sticky top-0 z-40 border-b border-white/5 backdrop-blur-xl">
+      <div className="mx-auto flex h-18 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-8">
         <Logo />
 
-        <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
+        <nav
+          aria-label="Main"
+          className="hidden items-center gap-8 text-xs font-semibold tracking-[0.14em] uppercase md:flex"
+        >
           {navLinks.map((link) => (
-            <Button key={link.href} asChild variant="ghost" size="sm">
-              <Link href={link.href}>{link.label}</Link>
-            </Button>
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-muted-foreground hover:text-foreground rounded transition-colors"
+            >
+              {link.label}
+            </Link>
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/login">Sign in</Link>
-          </Button>
+        <div className="hidden items-center gap-4 md:flex">
+          <Link
+            href="/login"
+            className="text-muted-foreground hover:text-foreground rounded text-xs font-semibold tracking-[0.14em] uppercase transition-colors"
+          >
+            Sign in
+          </Link>
           <Button asChild size="sm">
             <Link href="/signup">Get started</Link>
           </Button>
@@ -63,7 +73,7 @@ export function SiteHeader() {
                 <SheetClose asChild key={link.href}>
                   <Link
                     href={link.href}
-                    className="hover:bg-secondary rounded-md px-3 py-2 text-sm font-medium"
+                    className="hover:bg-secondary rounded-lg px-3 py-2 text-sm font-semibold tracking-wide uppercase"
                   >
                     {link.label}
                   </Link>

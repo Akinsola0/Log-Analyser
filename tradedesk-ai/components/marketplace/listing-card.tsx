@@ -30,7 +30,7 @@ export function ListingCard({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <h3 className="text-lg font-semibold">
+              <h3 className="display text-2xl">
                 <Link
                   href={`/pro/${listing.slug}`}
                   className="rounded underline-offset-4 hover:underline"
@@ -64,7 +64,7 @@ export function ListingCard({
             {listing.answers_24_7 ? (
               <Badge
                 variant="outline"
-                className="border-brand-amber/60 bg-amber-50 text-amber-800"
+                className="border-brand-to/45 bg-brand-to/12 text-pink-200"
               >
                 Answers 24/7
               </Badge>

@@ -72,7 +72,8 @@ Next.js (App Router) · TypeScript · Tailwind CSS v4 · shadcn/ui components (v
 
 ## Conventions
 
-- One polished light theme, defined as tokens in `app/globals.css`. Don't hardcode colours in components.
+- One polished dark theme, defined as tokens in `app/globals.css`: a near-black warmed towards red, one crimson-to-magenta accent kept for emphasis and glow, and `.section-invert` for the light bands that break up a long page. Don't hardcode colours in components.
+- Headlines use the `.display` class (Archivo, uppercase, tight tracking); small letterspaced labels use `.kicker`. Body copy stays in Geist.
 - Status badges are keyed on the database enums (`components/status-badge.tsx`) — if the backend adds a value, add it there and nowhere else.
 - Money is integer euro cents everywhere; format with `formatEuro()` in `lib/format.ts`.
 - Copy is written for a tradesman, in plain language: "missed call", "booked job", "burst pipe" — never "leverage your workflow".

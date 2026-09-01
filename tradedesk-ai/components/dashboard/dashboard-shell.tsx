@@ -49,10 +49,10 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
             onClick={onNavigate}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
               active
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                ? "from-brand-from/20 via-brand-via/15 to-brand-to/20 text-foreground bg-linear-100"
+                : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
             )}
           >
             <item.icon className="size-4" aria-hidden />
@@ -107,14 +107,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-full flex-1 flex-col lg:flex-row">
-      <aside className="bg-card hidden w-60 shrink-0 border-r lg:flex lg:flex-col">
-        <div className="flex h-16 items-center border-b px-4">
+      <aside className="hidden w-64 shrink-0 border-r border-white/10 bg-white/[0.02] lg:flex lg:flex-col">
+        <div className="flex h-18 items-center border-b border-white/10 px-5">
           <Logo />
         </div>
-        <div className="flex-1 p-3">
+        <div className="flex-1 p-4">
           <NavLinks />
         </div>
-        <div className="text-muted-foreground border-t p-4 text-xs">
+        <div className="text-muted-foreground border-t border-white/10 p-5 text-xs">
           {loading ? (
             <Skeleton className="h-8 w-full" />
           ) : session ? (
@@ -130,7 +130,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b px-4 backdrop-blur sm:px-6">
+        <header className="bg-background/70 sticky top-0 z-30 flex h-18 items-center justify-between gap-3 border-b border-white/10 px-4 backdrop-blur-xl sm:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild className="lg:hidden">
@@ -155,10 +155,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <Skeleton className="h-5 w-40" />
               ) : (
                 <>
-                  <p className="truncate text-sm font-semibold">
+                  <p className="display truncate text-lg">
                     {session.business.name}
                   </p>
-                  <p className="text-muted-foreground truncate text-xs">
+                  <p className="text-muted-foreground truncate text-[0.7rem] tracking-[0.14em] uppercase">
                     {tradeTypeLabels[session.business.trade_type]} ·{" "}
                     {session.business.timezone}
                   </p>
@@ -197,7 +197,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </DropdownMenu>
         </header>
 
-        <main id="main" className="flex-1 px-4 py-6 sm:px-6 lg:py-8">
+        <main id="main" className="flex-1 px-4 py-8 sm:px-8">
           {children}
         </main>
       </div>

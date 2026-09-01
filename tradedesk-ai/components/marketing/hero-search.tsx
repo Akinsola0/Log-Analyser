@@ -43,14 +43,11 @@ export function HeroSearch({
       }}
     >
       <div className="grid gap-1.5">
-        <Label
-          htmlFor="hero-trade"
-          className="text-xs font-medium text-muted-foreground"
-        >
+        <Label htmlFor="hero-trade" className="kicker text-muted-foreground">
           What do you need?
         </Label>
         <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger id="hero-trade" className="w-full bg-background">
+          <SelectTrigger id="hero-trade" className="w-full">
             <SelectValue placeholder="Pick a trade" />
           </SelectTrigger>
           <SelectContent>
@@ -64,14 +61,11 @@ export function HeroSearch({
       </div>
 
       <div className="grid gap-1.5">
-        <Label
-          htmlFor="hero-location"
-          className="text-xs font-medium text-muted-foreground"
-        >
+        <Label htmlFor="hero-location" className="kicker text-muted-foreground">
           Where?
         </Label>
         <Select value={location} onValueChange={setLocation}>
-          <SelectTrigger id="hero-location" className="w-full bg-background">
+          <SelectTrigger id="hero-location" className="w-full">
             <SelectValue placeholder="Pick a town" />
           </SelectTrigger>
           <SelectContent>
@@ -88,7 +82,7 @@ export function HeroSearch({
         <span aria-hidden className="hidden text-xs sm:block">
           &nbsp;
         </span>
-        <Button type="submit" size="default" className="w-full sm:w-auto">
+        <Button type="submit" size="lg" className="w-full sm:w-auto">
           <Search />
           Search
         </Button>

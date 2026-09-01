@@ -65,8 +65,12 @@ export default async function FindPage({ params }: FindPageProps) {
     <>
       <SiteHeader />
       <main id="main" className="flex-1">
-        <div className="bg-secondary/60 border-b">
-          <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
+        <div className="relative isolate overflow-hidden border-b border-white/10">
+          <div
+            aria-hidden
+            className="brand-glow pointer-events-none absolute -top-40 right-10 h-80 w-80 opacity-40"
+          />
+          <div className="relative mx-auto w-full max-w-6xl px-4 py-12 sm:px-8">
             <nav
               aria-label="Breadcrumb"
               className="text-muted-foreground text-sm"
@@ -83,10 +87,10 @@ export default async function FindPage({ params }: FindPageProps) {
               </span>
             </nav>
 
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+            <h1 className="display mt-4 text-4xl sm:text-5xl">
               {match.plural} in {town.town}, Co. {town.county}
             </h1>
-            <p className="text-muted-foreground mt-2 max-w-2xl">
+            <p className="text-muted-foreground mt-4 max-w-2xl">
               Verified {match.plural.toLowerCase()} covering {town.town}, with
               indicative prices from {formatEuro(match.from_price_cents)}. Every
               review below comes from a completed job, and every profile shows
@@ -95,17 +99,17 @@ export default async function FindPage({ params }: FindPageProps) {
           </div>
         </div>
 
-        <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
+        <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-8">
           <SearchResults
             category={category}
             location={town.slug}
             categories={categories}
           />
 
-          <section className="mt-12 grid gap-8 border-t pt-8 md:grid-cols-2">
+          <section className="mt-14 grid gap-8 border-t border-white/10 pt-10 md:grid-cols-2">
             {nearbyTowns.length > 0 ? (
               <div>
-                <h2 className="font-semibold">
+                <h2 className="kicker text-muted-foreground">
                   {match.plural} in nearby towns
                 </h2>
                 <ul className="mt-3 space-y-2 text-sm">
@@ -113,7 +117,7 @@ export default async function FindPage({ params }: FindPageProps) {
                     <li key={item.slug}>
                       <Link
                         href={`/find/${category}/${item.slug}`}
-                        className="text-primary rounded underline-offset-4 hover:underline"
+                        className="hover:text-foreground text-muted-foreground rounded underline-offset-4 transition-colors hover:underline"
                       >
                         {match.plural} in {item.town}
                       </Link>
@@ -124,13 +128,15 @@ export default async function FindPage({ params }: FindPageProps) {
             ) : null}
 
             <div>
-              <h2 className="font-semibold">Other trades in {town.town}</h2>
+              <h2 className="kicker text-muted-foreground">
+                Other trades in {town.town}
+              </h2>
               <ul className="mt-3 space-y-2 text-sm">
                 {otherCategories.map((item) => (
                   <li key={item.slug}>
                     <Link
                       href={`/find/${item.slug}/${town.slug}`}
-                      className="text-primary rounded underline-offset-4 hover:underline"
+                      className="hover:text-foreground text-muted-foreground rounded underline-offset-4 transition-colors hover:underline"
                     >
                       {item.plural} in {town.town} · from{" "}
                       {formatEuro(item.from_price_cents)}

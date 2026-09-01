@@ -29,10 +29,10 @@ export function AttentionList({ items }: { items: AttentionItem[] }) {
           <Link
             href={item.href}
             className={cn(
-              "group flex items-start gap-3 rounded-lg border p-3 transition-colors",
+              "group flex items-start gap-3 rounded-xl border p-4 transition-colors",
               item.severity === "error"
-                ? "border-destructive/40 bg-destructive/5 hover:bg-destructive/10"
-                : "border-amber-300 bg-amber-50 hover:bg-amber-100",
+                ? "border-destructive/40 bg-destructive/10 hover:bg-destructive/15"
+                : "border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/15",
             )}
           >
             <span

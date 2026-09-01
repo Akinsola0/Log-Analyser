@@ -66,7 +66,7 @@ export function SearchResults({
           <div className="grid gap-1.5">
             <Label
               htmlFor="listing-search"
-              className="text-muted-foreground text-xs"
+              className="kicker text-muted-foreground"
             >
               Search these results
             </Label>
@@ -88,7 +88,7 @@ export function SearchResults({
           <div className="grid gap-1.5">
             <Label
               htmlFor="listing-sort"
-              className="text-muted-foreground text-xs"
+              className="kicker text-muted-foreground"
             >
               Sort by
             </Label>
@@ -112,7 +112,7 @@ export function SearchResults({
           <div className="grid gap-1.5">
             <Label
               htmlFor="listing-rating"
-              className="text-muted-foreground text-xs"
+              className="kicker text-muted-foreground"
             >
               Minimum rating
             </Label>

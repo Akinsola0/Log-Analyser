@@ -52,8 +52,16 @@ export default async function ProPage({ params }: ProPageProps) {
     <>
       <SiteHeader />
       <main id="main" className="flex-1">
-        <div className="bg-secondary/60 border-b">
-          <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
+        <div className="relative isolate overflow-hidden border-b border-white/10">
+          <div
+            aria-hidden
+            className="dot-grid pointer-events-none absolute inset-0 opacity-25"
+          />
+          <div
+            aria-hidden
+            className="brand-glow pointer-events-none absolute -top-32 right-0 h-80 w-80 opacity-40"
+          />
+          <div className="relative mx-auto w-full max-w-6xl px-4 py-12 sm:px-8">
             <nav
               aria-label="Breadcrumb"
               className="text-muted-foreground text-sm"
@@ -84,10 +92,10 @@ export default async function ProPage({ params }: ProPageProps) {
               />
 
               <div className="min-w-0 flex-1">
-                <h1 className="text-3xl font-semibold tracking-tight">
+                <h1 className="display text-4xl sm:text-5xl">
                   {profile.business_name}
                 </h1>
-                <p className="text-muted-foreground mt-1">{profile.headline}</p>
+                <p className="text-muted-foreground mt-2">{profile.headline}</p>
 
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {profile.categories.map((category) => (
@@ -98,7 +106,7 @@ export default async function ProPage({ params }: ProPageProps) {
                   {profile.answers_24_7 ? (
                     <Badge
                       variant="outline"
-                      className="border-brand-amber/60 bg-amber-50 text-amber-800"
+                      className="border-brand-to/45 bg-brand-to/12 text-pink-200"
                     >
                       Answers 24/7
                     </Badge>
@@ -132,10 +140,10 @@ export default async function ProPage({ params }: ProPageProps) {
           </div>
         </div>
 
-        <div className="mx-auto grid w-full max-w-5xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_24rem]">
+        <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-8 lg:grid-cols-[1fr_24rem]">
           <div className="space-y-10">
             <section>
-              <h2 className="text-xl font-semibold">About</h2>
+              <h2 className="display text-2xl">About</h2>
               <p className="mt-3 leading-relaxed">{profile.bio}</p>
               <p className="text-muted-foreground mt-4 flex items-start gap-2 text-sm">
                 <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden />
@@ -144,13 +152,13 @@ export default async function ProPage({ params }: ProPageProps) {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold">Prices</h2>
+              <h2 className="display text-2xl">Prices</h2>
               <p className="text-muted-foreground mt-1 text-sm">
                 Indicative starting prices, given by {profile.business_name}.
                 The quote you get is theirs — but you shouldn&apos;t have to
                 ring to find out the ballpark.
               </p>
-              <ul className="mt-4 divide-y rounded-xl border">
+              <ul className="divide-border mt-5 divide-y rounded-2xl border">
                 {profile.services.map((service) => (
                   <li
                     key={service.name}
@@ -162,11 +170,11 @@ export default async function ProPage({ params }: ProPageProps) {
                         {service.description}
                       </p>
                     </div>
-                    <p className="whitespace-nowrap">
-                      <span className="text-muted-foreground text-xs">
-                        from{" "}
+                    <p className="text-right whitespace-nowrap">
+                      <span className="kicker text-muted-foreground block text-[0.6rem]">
+                        From
                       </span>
-                      <span className="text-lg font-semibold">
+                      <span className="display mt-1 block text-2xl">
                         {formatEuro(service.from_price_cents)}
                       </span>
                     </p>
@@ -176,7 +184,7 @@ export default async function ProPage({ params }: ProPageProps) {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold">
+              <h2 className="display text-2xl">
                 Reviews ({profile.review_count})
               </h2>
               <p className="text-muted-foreground mt-1 text-sm">
@@ -217,7 +225,7 @@ export default async function ProPage({ params }: ProPageProps) {
           <aside id="contact" className="lg:sticky lg:top-24 lg:self-start">
             <Card className="py-5">
               <CardContent className="px-5">
-                <h2 className="text-lg font-semibold">Request a callback</h2>
+                <h2 className="display text-xl">Request a callback</h2>
                 <p className="text-muted-foreground mt-1 text-sm">
                   {profile.responds_within_minutes !== null
                     ? `${profile.business_name} usually replies within ${profile.responds_within_minutes} minutes.`

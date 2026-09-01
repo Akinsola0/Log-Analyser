@@ -4,15 +4,15 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const alertVariants = cva(
-  "relative grid w-full grid-cols-[0_1fr] items-start gap-y-0.5 rounded-lg border px-4 py-3 text-sm has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] has-[>svg]:gap-x-3 [&>svg]:size-4 [&>svg]:translate-y-0.5",
+  "relative grid w-full grid-cols-[0_1fr] items-start gap-y-0.5 rounded-xl border px-4 py-3 text-sm has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] has-[>svg]:gap-x-3 [&>svg]:size-4 [&>svg]:translate-y-0.5",
   {
     variants: {
       variant: {
         default: "bg-card text-card-foreground",
         warning:
-          "border-amber-300 bg-amber-50 text-amber-900 [&>svg]:text-amber-600",
+          "border-amber-400/30 bg-amber-400/10 text-amber-200 [&>svg]:text-amber-300",
         destructive:
-          "border-destructive/40 bg-destructive/5 text-destructive [&>svg]:text-destructive",
+          "border-destructive/40 bg-destructive/10 text-red-200 [&>svg]:text-red-300",
       },
     },
     defaultVariants: {

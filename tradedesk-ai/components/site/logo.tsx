@@ -2,35 +2,23 @@ import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 
-export function Logo({
-  className,
-  tone = "dark",
-}: {
-  className?: string;
-  /** `light` for use on the navy footer/hero. */
-  tone?: "dark" | "light";
-}) {
+export function Logo({ className }: { className?: string }) {
   return (
     <Link
       href="/"
       className={cn(
-        "flex items-center gap-2 rounded-md text-base font-semibold tracking-tight",
-        tone === "light" ? "text-white" : "text-foreground",
+        "display flex items-center gap-2 rounded-md text-lg tracking-tight",
         className,
       )}
     >
       <span
         aria-hidden
-        className={cn(
-          "flex size-7 items-center justify-center rounded-md text-sm font-bold",
-          tone === "light"
-            ? "bg-brand-amber text-brand-amber-foreground"
-            : "bg-primary text-primary-foreground",
-        )}
+        className="from-brand-from via-brand-via to-brand-to flex size-7 items-center justify-center rounded-lg bg-linear-100 text-[0.7rem] font-black text-white"
       >
         TD
       </span>
-      TradeDesk AI
+      TradeDesk
+      <span className="text-muted-foreground align-super text-[0.6rem]">®</span>
     </Link>
   );
 }

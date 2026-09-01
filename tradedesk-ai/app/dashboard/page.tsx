@@ -63,7 +63,7 @@ export default function DashboardOverviewPage() {
   const stats = data
     ? [
         {
-          label: "Calls answered this week",
+          label: "Calls answered",
           value: String(data.summary.calls_answered_this_week),
           icon: PhoneCall,
         },
@@ -78,7 +78,7 @@ export default function DashboardOverviewPage() {
           icon: CalendarDays,
         },
         {
-          label: "Answered out of hours",
+          label: "Out of hours",
           value: String(data.summary.after_hours_calls_this_week),
           icon: MoonStar,
         },
@@ -113,18 +113,16 @@ export default function DashboardOverviewPage() {
         <div className="space-y-6">
           <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             {stats.map((stat) => (
-              <li key={stat.label}>
-                <Card className="gap-2 py-4">
+              <li key={stat.label} className="h-full">
+                <Card className="h-full gap-2 py-5">
                   <CardHeader className="px-4">
-                    <CardDescription className="flex items-center gap-1.5">
+                    <CardDescription className="kicker flex items-center gap-1.5 text-[0.65rem]">
                       <stat.icon className="size-3.5" aria-hidden />
                       {stat.label}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="px-4">
-                    <p className="text-2xl font-semibold tracking-tight">
-                      {stat.value}
-                    </p>
+                    <p className="display text-4xl">{stat.value}</p>
                   </CardContent>
                 </Card>
               </li>

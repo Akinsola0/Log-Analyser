@@ -22,7 +22,7 @@ export function EmptyState({
   description?: string;
 }) {
   return (
-    <div className="text-muted-foreground flex flex-col items-center gap-2 rounded-lg border border-dashed px-6 py-12 text-center">
+    <div className="text-muted-foreground flex flex-col items-center gap-2 rounded-2xl border border-dashed border-white/15 px-6 py-14 text-center">
       <Inbox className="size-5" aria-hidden />
       <p className="text-foreground font-medium">{title}</p>
       {description ? <p className="max-w-sm text-sm">{description}</p> : null}
@@ -40,7 +40,7 @@ export function ErrorState({
   return (
     <div
       role="alert"
-      className="border-destructive/40 bg-destructive/5 text-destructive flex flex-col items-start gap-3 rounded-lg border px-4 py-4"
+      className="border-destructive/40 bg-destructive/10 flex flex-col items-start gap-3 rounded-2xl border px-4 py-4 text-red-200"
     >
       <p className="flex items-center gap-2 font-medium">
         <AlertCircle className="size-4" aria-hidden />
