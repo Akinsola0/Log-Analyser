@@ -51,6 +51,52 @@ rm -rf .claude/skills/ui-ux-pro-max/scripts/tests
 
 ---
 
+## power-design
+
+| | |
+|---|---|
+| Source | https://github.com/ItsssssJack/power-design |
+| Commit | `f0c4143a` (2026-08-10) |
+| Licence | MIT — © 2026 Jack Roberts (`LICENSE` kept alongside the skill) |
+| Size | 2.4 MB, markdown only |
+
+Two rulebooks with numeric thresholds — `principles/web-principles.md` (20
+rules for fluid, interactive pages) and `principles/design-principles.md` (20
+for 16:9 slides) — plus 72 pre-extracted brand style guides in
+`brands/<slug>/brand-style.md`, each a full token spec: palette with roles,
+type scale, spacing, component treatments and voice.
+
+Useful here for the brand files as calibration — `brands/linear.app`,
+`brands/supabase`, `brands/raycast` and `brands/vercel`-style dark systems are
+close cousins of the TradeDesk direction — and for the web rulebook's
+thresholds when arguing about a specific value.
+
+### What was left out
+
+- `principles/images/` — 21 PNGs, ~1 MB each, 20 MB in total. Nothing in
+  `SKILL.md` or either rulebook references them; they illustrate the upstream
+  README. Skipping them takes the skill from 42 MB to 2.4 MB.
+- `email-assets/` — icons for an unrelated welcome email.
+
+### Firecrawl is optional, and not set up
+
+`SKILL.md` offers a path where you paste a URL and it extracts that brand's DNA
+via the Firecrawl MCP server (`lib/extract-brand.md`). That needs a Firecrawl
+API key and the MCP server configured; neither exists in this repo, and this
+environment's egress proxy blocks most external hosts anyway. **The
+72 bundled brands work without any of that** — the URL path is the
+only part that needs setup, and it will fail rather than silently degrade if
+you try it.
+
+<details>
+<summary>The 72 bundled brands</summary>
+
+`airbnb`, `airtable`, `apple`, `binance`, `bmw`, `bmw-m`, `bugatti`, `cal`, `claude`, `clay`, `clickhouse`, `cohere`, `coinbase`, `composio`, `cursor`, `elevenlabs`, `expo`, `ferrari`, `figma`, `framer`, `glaido`, `grind`, `hashicorp`, `ibm`, `intercom`, `kraken`, `lamborghini`, `linear.app`, `lovable`, `mastercard`, `meta`, `minimax`, `mintlify`, `miro`, `mistral.ai`, `mongodb`, `nike`, `notion`, `nvidia`, `ollama`, `opencode.ai`, `pinterest`, `playstation`, `posthog`, `raycast`, `renault`, `replicate`, `resend`, `revolut`, `runwayml`, `sanity`, `sentry`, `shopify`, `spacex`, `spotify`, `starbucks`, `stripe`, `supabase`, `superhuman`, `tesla`, `theverge`, `together.ai`, `uber`, `vercel`, `vodafone`, `voltagent`, `warp`, `webflow`, `wired`, `wise`, `x.ai`, `zapier`
+
+</details>
+
+---
+
 ## frontend-design
 
 | | |
