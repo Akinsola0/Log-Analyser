@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useCallback, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { LogOut, Menu, PhoneIncoming } from "lucide-react";
 
 import { dashboardNav } from "@/components/dashboard/dashboard-nav";
@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAsync } from "@/hooks/use-async";
-import { getSession } from "@/lib/api";
+import { getSession, signOut } from "@/lib/api";
 import { formatPhone } from "@/lib/format";
 import { tradeTypeLabels } from "@/lib/labels";
 import { cn } from "@/lib/utils";
@@ -69,10 +69,35 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
  * hardcodes a business id, because RLS decides which one you get.
  */
 export function DashboardShell({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
-  const { data: session, loading } = useAsync(
-    useCallback(() => getSession(), []),
-  );
+  const {
+    data: session,
+    loading,
+    error,
+  } = useAsync(useCallback(() => getSession(), []));
+
+  // `getSession()` throws when nobody is signed in — that is the gate.
+  const signedOut = !loading && !session;
+  useEffect(() => {
+    if (signedOut) router.replace("/login");
+  }, [signedOut, router]);
+
+  async function handleSignOut() {
+    await signOut();
+    router.replace("/login");
+  }
+
+  if (signedOut) {
+    return (
+      <main id="main" className="flex flex-1 items-center justify-center p-8">
+        <p className="text-muted-foreground text-sm">
+          {error?.message ?? "You need to sign in to see that."} Taking you to
+          the sign-in screen…
+        </p>
+      </main>
+    );
+  }
 
   const initials = session?.profile.name
     .split(" ")
@@ -164,12 +189,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <DropdownMenuItem asChild>
                 <Link href="/dashboard/settings">Business profile</Link>
               </DropdownMenuItem>
-              {/* TODO(backend): call supabase.auth.signOut() once auth is wired. */}
-              <DropdownMenuItem asChild variant="destructive">
-                <Link href="/login">
-                  <LogOut />
-                  Sign out
-                </Link>
+              <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
+                <LogOut />
+                Sign out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

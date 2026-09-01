@@ -1,55 +1,26 @@
 "use client";
 
-import Link from "next/link";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { ArrowRight, KeyRound } from "lucide-react";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { DemoAuthForm } from "@/components/auth/demo-auth-form";
 import {
   getSupabaseBrowserClient,
   isSupabaseConfigured,
 } from "@/lib/supabase/client";
 
 /**
- * Supabase Auth UI, pointed at whatever project the backend team provisions.
+ * The auth screen, in whichever mode the environment allows.
  *
- * Until `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` exist,
- * the screen says so plainly and still lets you into the dashboard, which runs
- * on mock data anyway.
+ * With `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` set, this
+ * is Supabase Auth UI against the real project. Without them it's the demo form
+ * — the same sign-up and sign-in, kept in the browser, so the dashboard is
+ * usable before the backend exists.
  */
 export function AuthPanel({ view }: { view: "sign_in" | "sign_up" }) {
+  // No Supabase project yet: sign up and sign in against browser-local accounts.
   if (!isSupabaseConfigured) {
-    return (
-      <div className="space-y-4">
-        <Alert variant="warning">
-          <KeyRound />
-          <AlertTitle>Supabase isn&apos;t connected yet</AlertTitle>
-          <AlertDescription>
-            <p>
-              This screen renders the Supabase Auth UI as soon as
-              <code className="mx-1 rounded bg-black/5 px-1 py-0.5 font-mono text-xs">
-                NEXT_PUBLIC_SUPABASE_URL
-              </code>
-              and
-              <code className="mx-1 rounded bg-black/5 px-1 py-0.5 font-mono text-xs">
-                NEXT_PUBLIC_SUPABASE_ANON_KEY
-              </code>
-              are set — see{" "}
-              <code className="font-mono text-xs">.env.example</code>.
-            </p>
-          </AlertDescription>
-        </Alert>
-
-        <Button asChild className="w-full">
-          <Link href="/dashboard">
-            Open the dashboard on mock data
-            <ArrowRight />
-          </Link>
-        </Button>
-      </div>
-    );
+    return <DemoAuthForm mode={view === "sign_up" ? "sign_up" : "sign_in"} />;
   }
 
   return (

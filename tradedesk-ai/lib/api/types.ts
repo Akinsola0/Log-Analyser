@@ -430,6 +430,40 @@ export interface SearchListingsInput {
   sort?: "recommended" | "rating" | "price";
 }
 
+/* -------------------------------------------------------------------------- */
+/* Auth                                                                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The signed-in account.
+ *
+ * Backed by browser-local demo accounts until Supabase is connected — see
+ * `lib/api/auth.ts`. `id` becomes the Supabase `auth.users.id`, which is also
+ * `profiles.id`.
+ */
+export interface AuthUser {
+  id: UUID;
+  email: string;
+  name: string;
+  /** Creates the `businesses` row on sign-up. */
+  business_name: string;
+  trade_type: TradeType;
+  created_at: ISODateTime;
+}
+
+export interface SignUpInput {
+  name: string;
+  business_name: string;
+  trade_type: TradeType;
+  email: string;
+  password: string;
+}
+
+export interface SignInInput {
+  email: string;
+  password: string;
+}
+
 /** The signed-in user plus the business RLS scopes them to. */
 export interface SessionContext {
   profile: Profile;

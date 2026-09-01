@@ -8,6 +8,15 @@
  */
 export * from "@/lib/api/types";
 export { getSession } from "@/lib/api/session";
+export {
+  DEMO_ACCOUNT,
+  NotSignedInError,
+  getCurrentUser,
+  isDemoAuth,
+  signIn,
+  signOut,
+  signUp,
+} from "@/lib/api/auth";
 export { getBusiness, updateBusiness } from "@/lib/api/business";
 export { getAvailability, saveAvailability } from "@/lib/api/availability";
 export { getLeads, getLead, updateLeadStatus } from "@/lib/api/leads";
