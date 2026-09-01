@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 
 import { CategoryIcon } from "@/components/marketing/category-icon";
 import { HeroSearch } from "@/components/marketing/hero-search";
+import { ToolBadge } from "@/components/marketing/tool-badge";
 import { SiteHeader } from "@/components/site/site-header";
 import { cn } from "@/lib/utils";
 import type { MarketplaceCategory, MarketplaceLocation } from "@/lib/api";
@@ -48,6 +49,12 @@ export function Hero({
       />
 
       <SiteHeader overlay />
+
+      {/* The signature element: an animated tool-assembly emblem, tucked into
+          the corner rather than competing with the headline — one bold
+          flourish, everything else quiet. Hidden below sm, where there's no
+          room for it to read as anything but clutter. */}
+      <ToolBadge className="pointer-events-none absolute top-24 right-4 hidden size-40 sm:block lg:top-28 lg:right-10 lg:size-52" />
 
       <div className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center px-4 py-28 text-center sm:px-6">
         <p className="text-xs font-semibold tracking-[0.16em] text-white/70 uppercase">
