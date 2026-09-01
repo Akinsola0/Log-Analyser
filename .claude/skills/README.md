@@ -51,6 +51,35 @@ rm -rf .claude/skills/ui-ux-pro-max/scripts/tests
 
 ---
 
+## frontend-design
+
+| | |
+|---|---|
+| Source | https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design |
+| Plugin version | 1.1.0 |
+| Commit | `f275fa28` (2026-08-31) |
+| Licence | **© Anthropic PBC, all rights reserved** — use is subject to Anthropic's Commercial Terms of Service. Unlike the other two vendored skills this is **not** MIT, so it is included here under attribution and is not relicensed by this repository. |
+| Size | 8 KB, one file |
+
+Anthropic's own frontend design skill: how to arrive at a distinctive visual
+direction rather than a templated one — brainstorm and critique before
+building, ground the design in the actual subject, spend boldness in one
+place, and write interface copy as design material. Prose only, no scripts and
+no data.
+
+Upstream ships it as a plugin (`.claude-plugin/plugin.json` plus the skill).
+Only `skills/frontend-design/` is vendored here, verbatim; the manifest and
+README stay upstream.
+
+Worth knowing when it argues with our current design: it names "a near-black
+background with a single bright acid-green or vermilion accent" as one of
+three looks AI reaches for by default. The TradeDesk direction is near-black
+with a crimson-to-magenta accent, which is adjacent — but it came from the
+reference images in the brief, and the skill is explicit that "the brief's own
+words always win". Treat it as a prompt to justify the choice, not to undo it.
+
+---
+
 ## awesome-design-skills (67 style presets)
 
 | | |
