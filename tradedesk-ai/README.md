@@ -2,6 +2,10 @@
 
 The marketing site, the tradesman dashboard and the homeowner marketplace for TradeDesk AI: an AI front desk that answers a trade's phone, books the job into their calendar and confirms it on WhatsApp or SMS.
 
+![Homepage hero](docs/screenshots/hero.png)
+
+📸 **[See every screen, next to the file that renders it →](docs/VISUAL_TOUR.md)**
+
 **This repository folder is the frontend only.** Supabase schema and RLS, the AI voice tool contract, Twilio, and the booking rules are owned by the backend team. Everything the UI needs from them is defined as a typed function in [`lib/api/`](lib/api) and documented in [`docs/api-contract.md`](docs/api-contract.md); every screen runs today on mock fixtures with no backend running.
 
 ## Running it
@@ -36,19 +40,22 @@ This is a stand-in, not a security boundary: the accounts live in one browser, a
 
 ## What's here
 
-| Route                                  | What it is                                                                                                                                                                                  |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                                    | Marketing homepage: dual "I need a tradesman" / "I am a tradesman" split, category grid with indicative prices, real reviews, cost-of-a-missed-call comparison, visible tiered pricing, FAQ |
-| `/login`, `/signup`                    | Sign-in and sign-up — demo auth today, Supabase Auth UI once the project exists                                                                                                             |
-| `/dashboard`                           | Overview: week counters and the "needs you" queue (failed calls, unsent confirmations, untouched leads)                                                                                     |
-| `/dashboard/leads`                     | Leads from the phone, the marketplace and by hand, filterable, with status changes                                                                                                          |
-| `/dashboard/calendar`                  | Week view of booked jobs against the business's working hours                                                                                                                               |
-| `/dashboard/calls`                     | Call log with the AI's outcome, its summary, and a one-click correction                                                                                                                     |
-| `/dashboard/messages`                  | Booking confirmations, including failures and a re-send on the other channel                                                                                                                |
-| `/dashboard/availability`              | Weekly working-hours editor, split days supported                                                                                                                                           |
-| `/dashboard/settings`                  | Business profile and confirmation-channel preferences                                                                                                                                       |
-| `/find`, `/find/[category]/[location]` | Marketplace browse and search                                                                                                                                                               |
-| `/pro/[slug]`                          | Public tradesman profile with services, prices and reviews                                                                                                                                  |
+Every row links to its screenshot(s) and source file in the [visual tour](docs/VISUAL_TOUR.md).
+
+| Route                                                                     | What it is                                                                                                                                                                                  |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`/`](docs/VISUAL_TOUR.md#marketing-site)                                 | Marketing homepage: dual "I need a tradesman" / "I am a tradesman" split, category grid with indicative prices, real reviews, cost-of-a-missed-call comparison, visible tiered pricing, FAQ |
+| [`/about`](docs/VISUAL_TOUR.md#about-page)                                | Company mission, stats, story and team                                                                                                                                                      |
+| [`/login`, `/signup`](docs/VISUAL_TOUR.md#sign-in--sign-up)               | Sign-in and sign-up — demo auth today, Supabase Auth UI once the project exists                                                                                                             |
+| [`/dashboard`](docs/VISUAL_TOUR.md#overview)                              | Overview: week counters and the "needs you" queue (failed calls, unsent confirmations, untouched leads)                                                                                     |
+| [`/dashboard/leads`](docs/VISUAL_TOUR.md#leads)                           | Leads from the phone, the marketplace and by hand, filterable, with status changes                                                                                                          |
+| [`/dashboard/calendar`](docs/VISUAL_TOUR.md#calendar)                     | Week view of booked jobs against the business's working hours                                                                                                                               |
+| [`/dashboard/calls`](docs/VISUAL_TOUR.md#call-log)                        | Call log with the AI's outcome, its summary, and a one-click correction                                                                                                                     |
+| [`/dashboard/messages`](docs/VISUAL_TOUR.md#confirmations)                | Booking confirmations, including failures and a re-send on the other channel                                                                                                                |
+| [`/dashboard/availability`](docs/VISUAL_TOUR.md#working-hours)            | Weekly working-hours editor, split days supported                                                                                                                                           |
+| [`/dashboard/settings`](docs/VISUAL_TOUR.md#business-profile)             | Business profile and confirmation-channel preferences                                                                                                                                       |
+| [`/find`, `/find/[category]/[location]`](docs/VISUAL_TOUR.md#marketplace) | Marketplace browse and search                                                                                                                                                               |
+| [`/pro/[slug]`](docs/VISUAL_TOUR.md#public-tradesman-profile)             | Public tradesman profile with services, prices and reviews                                                                                                                                  |
 
 ## How the data layer works
 
