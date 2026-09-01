@@ -35,7 +35,7 @@ export function TrustBlock({
         <BadgeCheck
           className={cn(
             "size-4",
-            verified ? "text-emerald-400" : "text-muted-foreground",
+            verified ? "text-primary" : "text-muted-foreground",
           )}
           aria-hidden
         />

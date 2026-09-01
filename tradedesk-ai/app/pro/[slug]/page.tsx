@@ -52,16 +52,8 @@ export default async function ProPage({ params }: ProPageProps) {
     <>
       <SiteHeader />
       <main id="main" className="flex-1">
-        <div className="relative isolate overflow-hidden border-b border-white/10">
-          <div
-            aria-hidden
-            className="dot-grid pointer-events-none absolute inset-0 opacity-25"
-          />
-          <div
-            aria-hidden
-            className="brand-glow pointer-events-none absolute -top-32 right-0 h-80 w-80 opacity-40"
-          />
-          <div className="relative mx-auto w-full max-w-6xl px-4 py-12 sm:px-8">
+        <div className="border-b">
+          <div className="mx-auto w-full max-w-[80rem] px-4 py-12 sm:px-8">
             <nav
               aria-label="Breadcrumb"
               className="text-muted-foreground text-sm"
@@ -106,7 +98,7 @@ export default async function ProPage({ params }: ProPageProps) {
                   {profile.answers_24_7 ? (
                     <Badge
                       variant="outline"
-                      className="border-brand-to/45 bg-brand-to/12 text-pink-200"
+                      className="border-ink/25 bg-hivis text-ink"
                     >
                       Answers 24/7
                     </Badge>
@@ -140,7 +132,7 @@ export default async function ProPage({ params }: ProPageProps) {
           </div>
         </div>
 
-        <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-8 lg:grid-cols-[1fr_24rem]">
+        <div className="mx-auto grid w-full max-w-[80rem] gap-12 px-4 py-12 sm:px-8 lg:grid-cols-[1fr_23rem]">
           <div className="space-y-10">
             <section>
               <h2 className="display text-2xl">About</h2>
@@ -158,7 +150,7 @@ export default async function ProPage({ params }: ProPageProps) {
                 The quote you get is theirs — but you shouldn&apos;t have to
                 ring to find out the ballpark.
               </p>
-              <ul className="divide-border mt-5 divide-y rounded-2xl border">
+              <ul className="divide-border mt-5 divide-y rounded border">
                 {profile.services.map((service) => (
                   <li
                     key={service.name}
@@ -171,10 +163,8 @@ export default async function ProPage({ params }: ProPageProps) {
                       </p>
                     </div>
                     <p className="text-right whitespace-nowrap">
-                      <span className="kicker text-muted-foreground block text-[0.6rem]">
-                        From
-                      </span>
-                      <span className="display mt-1 block text-2xl">
+                      <span className="field-label block">From</span>
+                      <span className="typed mt-1 block text-2xl font-bold">
                         {formatEuro(service.from_price_cents)}
                       </span>
                     </p>

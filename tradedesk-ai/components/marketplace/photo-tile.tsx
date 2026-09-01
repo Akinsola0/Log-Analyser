@@ -32,7 +32,7 @@ export function PhotoTile({
     <div
       aria-hidden
       className={cn(
-        "from-brand-from/25 via-brand-via/20 to-brand-to/25 text-foreground flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-linear-140",
+        "bg-secondary text-foreground flex items-center justify-center gap-2 rounded border",
         className,
       )}
     >

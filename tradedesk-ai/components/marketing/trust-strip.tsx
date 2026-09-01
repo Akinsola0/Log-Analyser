@@ -1,37 +1,30 @@
-import { BadgeCheck, ShieldCheck, Star } from "lucide-react";
-
 import { trustSignals } from "@/lib/marketing";
 
-const icons = [BadgeCheck, Star, ShieldCheck];
-
 /**
- * The three trust signals in one block rather than scattered across the page —
- * the same block repeats on every marketplace listing and profile.
+ * The three trust signals in one row rather than scattered — the same block
+ * repeats on every marketplace listing and profile.
  */
 export function TrustStrip() {
   return (
     <section
       aria-label="Why TradeDesk AI can be trusted"
-      className="border-y border-white/10 bg-white/[0.02]"
+      className="bg-secondary/50 border-b"
     >
-      <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-10 sm:px-8 md:grid-cols-3">
-        {trustSignals.map((signal, index) => {
-          const Icon = icons[index] ?? BadgeCheck;
-          return (
-            <div key={signal.title} className="flex items-start gap-3">
-              <Icon
-                className="text-brand-via mt-0.5 size-5 shrink-0"
-                aria-hidden
-              />
-              <div>
-                <h3 className="kicker">{signal.title}</h3>
-                <p className="text-muted-foreground mt-1.5 text-sm">
-                  {signal.body}
-                </p>
-              </div>
-            </div>
-          );
-        })}
+      <div className="mx-auto grid w-full max-w-[86rem] divide-y px-4 sm:px-8 md:grid-cols-3 md:divide-x md:divide-y-0">
+        {trustSignals.map((signal, index) => (
+          <div
+            key={signal.title}
+            className="py-6 md:px-6 md:first:pl-0 md:last:pr-0"
+          >
+            <p className="typed text-muted-foreground text-xs">
+              {String(index + 1).padStart(2, "0")}
+            </p>
+            <h3 className="display mt-2 text-lg">{signal.title}</h3>
+            <p className="text-muted-foreground mt-1.5 max-w-[46ch] text-sm">
+              {signal.body}
+            </p>
+          </div>
+        ))}
       </div>
     </section>
   );

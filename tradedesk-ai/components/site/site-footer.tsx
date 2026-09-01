@@ -18,12 +18,8 @@ const tradeLinks = [
 
 export function SiteFooter() {
   return (
-    <footer className="relative mt-auto overflow-hidden border-t border-white/10">
-      <div
-        aria-hidden
-        className="brand-glow pointer-events-none absolute -bottom-40 left-1/2 h-80 w-[42rem] -translate-x-1/2 opacity-40"
-      />
-      <div className="relative mx-auto grid w-full max-w-7xl gap-10 px-4 py-16 sm:px-8 md:grid-cols-4">
+    <footer className="band-dark mt-auto">
+      <div className="mx-auto grid w-full max-w-[86rem] gap-10 px-4 py-16 sm:px-8 md:grid-cols-4">
         <div className="md:col-span-2">
           <Logo />
           <p className="text-muted-foreground mt-4 max-w-sm text-sm">
@@ -35,7 +31,7 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <h2 className="kicker text-muted-foreground">I need a tradesman</h2>
+          <h2 className="field-label">I need a tradesman</h2>
           <ul className="mt-4 space-y-2.5 text-sm">
             {homeownerLinks.map((link) => (
               <li key={link.href}>
@@ -51,7 +47,7 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <h2 className="kicker text-muted-foreground">I am a tradesman</h2>
+          <h2 className="field-label">I am a tradesman</h2>
           <ul className="mt-4 space-y-2.5 text-sm">
             {tradeLinks.map((link) => (
               <li key={link.href}>
@@ -67,8 +63,8 @@ export function SiteFooter() {
         </div>
       </div>
 
-      <div className="relative border-t border-white/10">
-        <div className="text-muted-foreground mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 py-6 text-xs sm:flex-row sm:items-center sm:justify-between sm:px-8">
+      <div className="border-t">
+        <div className="text-muted-foreground typed mx-auto flex w-full max-w-[86rem] flex-col gap-2 px-4 py-6 text-xs sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <p>
             © {new Date().getFullYear()} TradeDesk AI. Registered in Ireland.
           </p>

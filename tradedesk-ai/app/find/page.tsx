@@ -24,18 +24,10 @@ export default async function FindIndexPage() {
     <>
       <SiteHeader />
       <main id="main" className="flex-1">
-        <section className="relative isolate overflow-hidden border-b border-white/10">
-          <div
-            aria-hidden
-            className="dot-grid pointer-events-none absolute inset-0 opacity-30"
-          />
-          <div
-            aria-hidden
-            className="brand-glow pointer-events-none absolute -top-32 right-0 h-96 w-96 opacity-50"
-          />
-          <div className="relative mx-auto w-full max-w-7xl px-4 py-16 sm:px-8">
-            <p className="kicker text-gradient">The marketplace</p>
-            <h1 className="display mt-4 text-5xl sm:text-6xl">
+        <section className="border-b">
+          <div className="mx-auto w-full max-w-[86rem] px-4 py-14 sm:px-8">
+            <p className="field-label">The marketplace</p>
+            <h1 className="display mt-4 text-[clamp(2.4rem,1.6rem+3vw,4rem)]">
               Find a tradesman who answers
             </h1>
             <p className="text-muted-foreground mt-4 max-w-2xl">
@@ -45,7 +37,7 @@ export default async function FindIndexPage() {
               someone.
             </p>
 
-            <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm sm:p-6">
+            <div className="docket mt-9 px-5 pt-7 pb-6 sm:px-6">
               <HeroSearch categories={categories} locations={locations} />
             </div>
           </div>
@@ -58,8 +50,8 @@ export default async function FindIndexPage() {
           defaultLocation={locations[0]?.slug ?? "naas"}
         />
 
-        <section className="border-t border-white/10">
-          <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-8">
+        <section className="border-t">
+          <div className="mx-auto w-full max-w-[86rem] px-4 py-16 sm:px-8">
             <h2 className="display text-4xl">Towns we cover</h2>
             <p className="text-muted-foreground mt-3">
               More towns as trades sign up. Links go to plumbers — swap the
@@ -70,7 +62,7 @@ export default async function FindIndexPage() {
                 <li key={location.slug}>
                   <Link
                     href={`/find/plumber/${location.slug}`}
-                    className="hover:border-brand-via/40 block rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-sm transition-colors"
+                    className="hover:bg-card block rounded border px-4 py-3 text-sm transition-colors"
                   >
                     <span className="font-medium">{location.town}</span>
                     <span className="text-muted-foreground block text-xs">

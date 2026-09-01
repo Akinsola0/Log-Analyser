@@ -17,12 +17,8 @@ export function AuthLayout({
 }) {
   return (
     <main id="main" className="grid flex-1 lg:grid-cols-2">
-      <div className="relative flex flex-col justify-center px-4 py-14 sm:px-10">
-        <div
-          aria-hidden
-          className="brand-glow pointer-events-none absolute -top-24 -left-24 h-80 w-80 opacity-30"
-        />
-        <div className="relative mx-auto w-full max-w-sm">
+      <div className="flex flex-col justify-center px-4 py-14 sm:px-10">
+        <div className="mx-auto w-full max-w-sm">
           <Logo />
           <h1 className="display mt-10 text-4xl">{title}</h1>
           <p className="text-muted-foreground mt-3 text-sm">{subtitle}</p>
@@ -41,28 +37,25 @@ export function AuthLayout({
         </div>
       </div>
 
-      <aside className="from-brand-from via-brand-via to-brand-to relative hidden flex-col justify-center overflow-hidden bg-linear-140 px-12 py-14 lg:flex">
-        <div
-          aria-hidden
-          className="dot-grid pointer-events-none absolute inset-0 opacity-25"
-        />
-
-        <blockquote className="display relative max-w-md text-3xl leading-[1.05] text-white">
+      <aside className="band-dark hidden flex-col justify-center px-12 py-14 lg:flex">
+        <blockquote className="display max-w-md text-3xl leading-[1.05]">
           “I was losing two or three jobs a week to voicemail.”
         </blockquote>
-        <p className="relative mt-5 max-w-md text-white/80">
+        <p className="text-muted-foreground mt-5 max-w-md">
           Now the phone gets answered while I&apos;m under a sink and the
           job&apos;s in the diary before I&apos;m back in the van.
         </p>
-        <p className="kicker relative mt-4 text-white/70">
+        <p className="field-label mt-5">
           Dermot Kelly · Kelly Plumbing &amp; Heating, Naas
         </p>
 
-        <ul className="relative mt-14 max-w-md space-y-5">
+        <ul className="mt-14 max-w-md space-y-5">
           {trustSignals.map((signal) => (
-            <li key={signal.title} className="border-t border-white/25 pt-4">
-              <p className="kicker text-white">{signal.title}</p>
-              <p className="mt-1.5 text-sm text-white/75">{signal.body}</p>
+            <li key={signal.title} className="border-t pt-4">
+              <p className="display text-lg">{signal.title}</p>
+              <p className="text-muted-foreground mt-1.5 text-sm">
+                {signal.body}
+              </p>
             </li>
           ))}
         </ul>

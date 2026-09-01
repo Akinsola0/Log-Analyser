@@ -7,18 +7,14 @@ export function Logo({ className }: { className?: string }) {
     <Link
       href="/"
       className={cn(
-        "display flex items-center gap-2 rounded-md text-lg tracking-tight",
+        "display flex items-baseline gap-2 rounded text-xl",
         className,
       )}
     >
-      <span
-        aria-hidden
-        className="from-brand-from via-brand-via to-brand-to flex size-7 items-center justify-center rounded-lg bg-linear-100 text-[0.7rem] font-black text-white"
-      >
-        TD
-      </span>
       TradeDesk
-      <span className="text-muted-foreground align-super text-[0.6rem]">®</span>
+      <span className="typed text-muted-foreground text-[0.7rem] font-normal tracking-normal normal-case">
+        AI
+      </span>
     </Link>
   );
 }

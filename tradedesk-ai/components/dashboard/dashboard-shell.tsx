@@ -49,10 +49,10 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
             onClick={onNavigate}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+              "flex items-center gap-3 rounded px-3 py-2.5 text-sm font-medium transition-colors",
               active
-                ? "from-brand-from/20 via-brand-via/15 to-brand-to/20 text-foreground bg-linear-100"
-                : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground",
             )}
           >
             <item.icon className="size-4" aria-hidden />
@@ -107,14 +107,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-full flex-1 flex-col lg:flex-row">
-      <aside className="hidden w-64 shrink-0 border-r border-white/10 bg-white/[0.02] lg:flex lg:flex-col">
-        <div className="flex h-18 items-center border-b border-white/10 px-5">
+      <aside className="bg-secondary/40 hidden w-64 shrink-0 border-r lg:flex lg:flex-col">
+        <div className="flex h-16 items-center border-b px-5">
           <Logo />
         </div>
         <div className="flex-1 p-4">
           <NavLinks />
         </div>
-        <div className="text-muted-foreground border-t border-white/10 p-5 text-xs">
+        <div className="text-muted-foreground border-t p-5 text-xs">
           {loading ? (
             <Skeleton className="h-8 w-full" />
           ) : session ? (
@@ -123,14 +123,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <PhoneIncoming className="size-3.5" aria-hidden />
                 AI answering on
               </p>
-              <p className="mt-1">{formatPhone(session.business.phone)}</p>
+              <p className="typed mt-1">
+                {formatPhone(session.business.phone)}
+              </p>
             </>
           ) : null}
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="bg-background/70 sticky top-0 z-30 flex h-18 items-center justify-between gap-3 border-b border-white/10 px-4 backdrop-blur-xl sm:px-8">
+        <header className="bg-background/92 sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b px-4 backdrop-blur sm:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild className="lg:hidden">
@@ -158,7 +160,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   <p className="display truncate text-lg">
                     {session.business.name}
                   </p>
-                  <p className="text-muted-foreground truncate text-[0.7rem] tracking-[0.14em] uppercase">
+                  <p className="field-label truncate">
                     {tradeTypeLabels[session.business.trade_type]} ·{" "}
                     {session.business.timezone}
                   </p>

@@ -43,7 +43,7 @@ export function HeroSearch({
       }}
     >
       <div className="grid gap-1.5">
-        <Label htmlFor="hero-trade" className="kicker text-muted-foreground">
+        <Label htmlFor="hero-trade" className="field-label">
           What do you need?
         </Label>
         <Select value={category} onValueChange={setCategory}>
@@ -61,7 +61,7 @@ export function HeroSearch({
       </div>
 
       <div className="grid gap-1.5">
-        <Label htmlFor="hero-location" className="kicker text-muted-foreground">
+        <Label htmlFor="hero-location" className="field-label">
           Where?
         </Label>
         <Select value={location} onValueChange={setLocation}>

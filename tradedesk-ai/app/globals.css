@@ -1,58 +1,101 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 /*
-  TradeDesk AI design tokens.
+  TradeDesk AI — the docket system.
 
-  One polished dark theme: a near-black warmed towards red, a single hot
-  crimson-to-magenta accent kept for emphasis and glow, and oversized uppercase
-  display type. Light surfaces are used deliberately, as inverted sections, to
-  break up a long page.
+  Grounded in the carbon-copy job docket every Irish trade keeps in the van:
+  manila card, ruled lines, blue biro, a hi-vis vest in the corner. The
+  product's actual output is a filled-in docket — who rang, what's wrong, when
+  they're booked — so the docket is the page's signature element.
+
+  Values are hex rather than oklch on purpose: these exact values were
+  contrast-checked (see the table below), and re-expressing them in another
+  space would invalidate that arithmetic.
+
+    ink on paper              14.2:1     white on biro        9.9:1
+    biro on paper              7.8:1     ink on hi-vis       14.0:1
+    muted ink on paper         6.0:1     paper on slate      11.9:1
+    hi-vis on slate           12.6:1     muted on slate       6.2:1
+
+  Two constraints fell out of that and drive the whole system:
+  - biro on slate is 1.6:1, so the dark band's accent is hi-vis, not biro.
+  - hi-vis on paper is 1.0:1, so hi-vis is never text on paper — only ever a
+    fill with ink on top, which is exactly how a highlighter behaves.
 */
 :root {
-  --radius: 1.25rem;
+  /* Printed paperwork: near-square corners, not pills. */
+  --radius: 0.25rem;
 
-  --background: oklch(0.145 0.022 8);
-  --foreground: oklch(0.97 0.004 20);
+  --background: #ede4d3; /* manila docket card */
+  --foreground: #191713; /* carbon black */
 
-  /* Cards sit just above the page, never pure grey. */
-  --card: oklch(0.185 0.021 8);
-  --card-foreground: oklch(0.97 0.004 20);
+  --card: #f6f0e3; /* the fresh top copy, lighter than the pad */
+  --card-foreground: #191713;
 
-  --popover: oklch(0.2 0.021 8);
-  --popover-foreground: oklch(0.97 0.004 20);
+  --popover: #f6f0e3;
+  --popover-foreground: #191713;
 
-  --primary: oklch(0.63 0.24 12);
-  --primary-foreground: oklch(0.99 0 0);
+  --primary: #1b3f8b; /* the biro that fills the docket in */
+  --primary-foreground: #ffffff;
 
-  --secondary: oklch(0.24 0.022 8);
-  --secondary-foreground: oklch(0.95 0.004 20);
+  --secondary: #e2d7c1;
+  --secondary-foreground: #191713;
 
-  --muted: oklch(0.24 0.022 8);
-  --muted-foreground: oklch(0.7 0.02 12);
+  --muted: #e2d7c1;
+  --muted-foreground: #5a5346;
 
-  --accent: oklch(0.62 0.26 348);
-  --accent-foreground: oklch(0.99 0 0);
+  --accent: #d8f035; /* hi-vis vest — fill only, never text on paper */
+  --accent-foreground: #191713;
 
-  --destructive: oklch(0.63 0.24 18);
-  --destructive-foreground: oklch(0.99 0 0);
+  --destructive: #a02616;
+  --destructive-foreground: #ffffff;
 
-  --border: oklch(0.3 0.02 10);
-  --input: oklch(0.32 0.02 10);
-  --ring: oklch(0.63 0.24 12);
+  --border: #d5c9b2;
+  --input: #c9bda4;
+  --ring: #1b3f8b;
 
-  /* The accent, as a gradient — hero, active states, chart fills, glow. */
-  --brand-from: oklch(0.66 0.24 30);
-  --brand-via: oklch(0.62 0.26 5);
-  --brand-to: oklch(0.6 0.26 340);
+  /* Named so components can reach for the material rather than the hex. */
+  --paper: #ede4d3;
+  --ink: #191713;
+  --biro: #1b3f8b;
+  --hivis: #d8f035;
+  --slate: #232120;
+}
 
-  /* Inverted sections: light ground, dark ink. */
-  --invert-background: oklch(0.96 0.008 60);
-  --invert-foreground: oklch(0.18 0.02 12);
-  --invert-muted-foreground: oklch(0.48 0.02 14);
-  --invert-border: oklch(0.87 0.01 40);
+/*
+  The dark band. Same token names, different material — so a Button or a Card
+  drops into a dark section and re-colours itself, including swapping the
+  accent from biro to hi-vis because biro fails contrast here.
+*/
+.band-dark {
+  --background: #232120;
+  --foreground: #e7ddcb;
+
+  --card: #2c2926;
+  --card-foreground: #e7ddcb;
+
+  --popover: #2c2926;
+  --popover-foreground: #e7ddcb;
+
+  --primary: #d8f035;
+  --primary-foreground: #191713;
+
+  --secondary: #34302c;
+  --secondary-foreground: #e7ddcb;
+
+  --muted: #34302c;
+  --muted-foreground: #a9a093;
+
+  --accent: #d8f035;
+  --accent-foreground: #191713;
+
+  --border: #3a3733;
+  --input: #46423d;
+  --ring: #d8f035;
+
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 @theme inline {
@@ -76,24 +119,22 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --color-brand-from: var(--brand-from);
-  --color-brand-via: var(--brand-via);
-  --color-brand-to: var(--brand-to);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-biro: var(--biro);
+  --color-hivis: var(--hivis);
+  --color-slate: var(--slate);
 
-  --color-invert-background: var(--invert-background);
-  --color-invert-foreground: var(--invert-foreground);
-  --color-invert-muted-foreground: var(--invert-muted-foreground);
-  --color-invert-border: var(--invert-border);
+  /* Two families, three roles — within the ≤2 web-font budget. */
+  --font-sans: var(--font-barlow);
+  --font-display: var(--font-barlow-condensed);
+  --font-mono: var(--font-courier);
 
-  --font-sans: var(--font-geist-sans);
-  --font-display: var(--font-archivo);
-  --font-mono: var(--font-geist-mono);
-
-  --radius-sm: calc(var(--radius) - 0.75rem);
-  --radius-md: calc(var(--radius) - 0.5rem);
-  --radius-lg: calc(var(--radius) - 0.25rem);
-  --radius-xl: var(--radius);
-  --radius-2xl: calc(var(--radius) + 0.5rem);
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 10px;
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
@@ -119,7 +160,7 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   * {
@@ -135,79 +176,101 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* Keyboard users must always be able to see where they are. */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-ring;
   }
 
   ::selection {
-    background: var(--brand-via);
-    color: white;
+    background: var(--hivis);
+    color: var(--ink);
   }
 }
 
 @layer components {
-  /*
-    Oversized uppercase display type — the loudest thing on any screen.
-    Sizes come from the caller; this fixes the face, weight and tracking.
-  */
+  /* Site signage: condensed, uppercase, the way a van or a site notice is set. */
   .display {
-    font-family:
-      var(--font-display), var(--font-geist-sans), system-ui, sans-serif;
-    font-weight: 800;
+    font-family: var(--font-display), "Barlow", system-ui, sans-serif;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: -0.03em;
-    line-height: 0.92;
+    letter-spacing: 0.005em;
+    line-height: 0.95;
   }
 
-  /* Small letterspaced label that sits above a heading. */
-  .kicker {
-    @apply text-xs font-semibold tracking-[0.18em] uppercase;
+  /* Typed onto the docket: times, prices, phone numbers, reference codes. */
+  .typed {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
   }
 
-  /* The accent gradient, as text. */
-  .text-gradient {
+  /* The pre-printed field label on a docket. */
+  .field-label {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    @apply text-[0.65rem] tracking-[0.16em] uppercase;
+    color: var(--muted-foreground);
+  }
+
+  /*
+    The docket itself: a torn-off top copy. The perforation is drawn rather
+    than imaged so it costs nothing and scales.
+  */
+  .docket {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: none;
+    position: relative;
+  }
+
+  .docket::before {
+    content: "";
+    position: absolute;
+    inset-inline: -1px;
+    top: -6px;
+    height: 6px;
+    background: radial-gradient(
+        circle at 6px 6px,
+        transparent 5px,
+        var(--border) 5px 5.6px,
+        var(--card) 5.6px
+      )
+      repeat-x;
+    background-size: 12px 12px;
+  }
+
+  /* Ruled writing lines, on the 8-point rhythm. */
+  .ruled {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0 31px,
+      color-mix(in srgb, var(--border) 70%, transparent) 31px 32px
+    );
+  }
+
+  /*
+    Highlighter. Hi-vis can't be read as text on paper (1.0:1), so it is only
+    ever a fill behind ink — which is the one honest way to use it.
+  */
+  .marker {
     background-image: linear-gradient(
       100deg,
-      var(--brand-from),
-      var(--brand-via) 45%,
-      var(--brand-to)
+      transparent 0.4%,
+      var(--hivis) 1.2% 98.6%,
+      transparent 99.4%
     );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    background-repeat: no-repeat;
+    background-size: 100% 82%;
+    background-position: 0 62%;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    padding-inline: 0.14em;
+    color: var(--ink);
   }
 
-  /* Blueprint dot grid, used behind hero sections. */
-  .dot-grid {
-    background-image: radial-gradient(
-      color-mix(in oklab, var(--foreground) 16%, transparent) 1px,
-      transparent 1px
-    );
-    background-size: 28px 28px;
-  }
-
-  /* Soft bloom of accent light — the neon glow in the references. */
-  .brand-glow {
-    background: radial-gradient(
-      closest-side,
-      color-mix(in oklab, var(--brand-via) 55%, transparent),
-      transparent
-    );
-    filter: blur(48px);
-  }
-
-  /* An inverted (light) band inside the dark page. */
-  .section-invert {
-    background: var(--invert-background);
-    color: var(--invert-foreground);
-    --border: var(--invert-border);
-    --muted-foreground: var(--invert-muted-foreground);
-    --card: oklch(1 0 0);
-    --card-foreground: var(--invert-foreground);
-    --foreground: var(--invert-foreground);
-    --secondary: oklch(0.93 0.008 60);
-    --secondary-foreground: var(--invert-foreground);
+  /* The rubber stamp a docket gets when the job is done. */
+  .stamp {
+    font-family: var(--font-display), system-ui, sans-serif;
+    @apply inline-block border-2 px-2 py-0.5 text-xs font-bold tracking-[0.1em] uppercase;
+    transform: rotate(-3deg);
   }
 }
 

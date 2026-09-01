@@ -72,8 +72,9 @@ Next.js (App Router) · TypeScript · Tailwind CSS v4 · shadcn/ui components (v
 
 ## Conventions
 
-- One polished dark theme, defined as tokens in `app/globals.css`: a near-black warmed towards red, one crimson-to-magenta accent kept for emphasis and glow, and `.section-invert` for the light bands that break up a long page. Don't hardcode colours in components.
-- Headlines use the `.display` class (Archivo, uppercase, tight tracking); small letterspaced labels use `.kicker`. Body copy stays in Geist.
-- Status badges are keyed on the database enums (`components/status-badge.tsx`) — if the backend adds a value, add it there and nowhere else.
+- One theme — **the docket system**, defined as tokens in `app/globals.css`: manila paper, carbon ink, biro blue, hi-vis, workshop slate. Don't hardcode colours in components.
+- `.band-dark` re-declares the same token names for dark sections, so a Button or Card dropped inside one re-colours itself — including swapping the accent from biro to hi-vis, because biro only reaches 1.6:1 on slate.
+- Hi-vis is never text on paper (1.0:1). It is only ever a fill with ink on top — the `.marker` highlighter and the "booked" badges.
+- Type has three roles: `.display` (Barlow Condensed, uppercase — signage), body (Barlow), and `.typed` / `.field-label` (Courier Prime — anything printed on a docket: times, prices, phone numbers, reference codes).
 - Money is integer euro cents everywhere; format with `formatEuro()` in `lib/format.ts`.
 - Copy is written for a tradesman, in plain language: "missed call", "booked job", "burst pipe" — never "leverage your workflow".

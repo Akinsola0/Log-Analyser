@@ -5,28 +5,27 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-semibold transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
   {
     variants: {
       variant: {
-        // The accent gradient, lifted by a glow on hover.
-        default:
-          "bg-linear-100 from-brand-from via-brand-via to-brand-to text-primary-foreground shadow-[0_8px_30px_-12px_var(--brand-via)] hover:brightness-110 hover:shadow-[0_10px_40px_-10px_var(--brand-via)]",
-        // White pill on a dark ground — the loudest call to action.
-        invert: "bg-white text-neutral-950 shadow-sm hover:bg-white/90",
+        // Biro on paper; the .band-dark scope swaps it to hi-vis with ink text,
+        // because biro only reaches 1.6:1 on slate.
+        default: "bg-primary text-primary-foreground hover:brightness-115",
+        // The hi-vis fill, ink on top — the one loud control per screen.
+        hivis: "bg-hivis text-ink hover:brightness-105",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-xs hover:brightness-110",
+          "bg-destructive text-destructive-foreground hover:brightness-110",
         outline:
-          "border bg-transparent hover:bg-secondary hover:text-secondary-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/70",
-        ghost: "hover:bg-secondary hover:text-secondary-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+          "border border-foreground/25 bg-transparent hover:bg-foreground/5",
+        secondary: "bg-secondary text-secondary-foreground hover:brightness-97",
+        ghost: "hover:bg-foreground/5",
+        link: "text-primary underline underline-offset-4 hover:no-underline",
       },
       size: {
-        default: "h-10 px-5 py-2 has-[>svg]:px-4",
-        sm: "h-8 gap-1.5 px-3.5 text-xs has-[>svg]:px-3",
-        lg: "h-12 px-7 text-base has-[>svg]:px-6",
+        default: "h-10 px-4 py-2 has-[>svg]:px-3.5",
+        sm: "h-8 gap-1.5 px-3 text-xs has-[>svg]:px-2.5",
+        lg: "h-12 px-6 text-base has-[>svg]:px-5",
         icon: "size-10",
       },
     },

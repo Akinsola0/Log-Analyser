@@ -64,10 +64,7 @@ export function SearchResults({
       <Card className="mb-5 py-4">
         <CardContent className="grid gap-3 px-4 md:grid-cols-[1fr_auto_auto_auto] md:items-end">
           <div className="grid gap-1.5">
-            <Label
-              htmlFor="listing-search"
-              className="kicker text-muted-foreground"
-            >
+            <Label htmlFor="listing-search" className="field-label">
               Search these results
             </Label>
             <div className="relative">
@@ -86,10 +83,7 @@ export function SearchResults({
           </div>
 
           <div className="grid gap-1.5">
-            <Label
-              htmlFor="listing-sort"
-              className="kicker text-muted-foreground"
-            >
+            <Label htmlFor="listing-sort" className="field-label">
               Sort by
             </Label>
             <Select
@@ -110,10 +104,7 @@ export function SearchResults({
           </div>
 
           <div className="grid gap-1.5">
-            <Label
-              htmlFor="listing-rating"
-              className="kicker text-muted-foreground"
-            >
+            <Label htmlFor="listing-rating" className="field-label">
               Minimum rating
             </Label>
             <Select value={minRating} onValueChange={setMinRating}>

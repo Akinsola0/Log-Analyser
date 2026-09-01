@@ -64,7 +64,7 @@ export function ListingCard({
             {listing.answers_24_7 ? (
               <Badge
                 variant="outline"
-                className="border-brand-to/45 bg-brand-to/12 text-pink-200"
+                className="border-ink/25 bg-hivis text-ink"
               >
                 Answers 24/7
               </Badge>

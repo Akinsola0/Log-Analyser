@@ -33,13 +33,14 @@ import {
   messageStatusLabels,
 } from "@/lib/labels";
 
-const base = "border font-medium";
+const base = "border font-semibold";
 
+// Booked wears the hi-vis fill — it is the outcome the whole product exists for.
 const leadStatusStyles: Record<LeadStatus, string> = {
-  new: "border-sky-400/30 bg-sky-400/10 text-sky-200",
-  qualified: "border-violet-400/30 bg-violet-400/10 text-violet-200",
-  booked: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
-  lost: "border-white/12 bg-white/5 text-white/55",
+  new: "border-primary/40 bg-primary/10 text-primary",
+  qualified: "border-foreground/30 bg-foreground/5 text-foreground",
+  booked: "border-ink/25 bg-hivis text-ink",
+  lost: "border-border bg-secondary text-muted-foreground",
 };
 
 export function LeadStatusBadge({ status }: { status: LeadStatus }) {
@@ -51,10 +52,10 @@ export function LeadStatusBadge({ status }: { status: LeadStatus }) {
 }
 
 const jobStatusStyles: Record<JobStatus, string> = {
-  booked: "border-sky-400/30 bg-sky-400/10 text-sky-200",
-  confirmed: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
-  completed: "border-white/12 bg-white/5 text-white/55",
-  cancelled: "border-red-400/35 bg-red-400/10 text-red-200",
+  booked: "border-primary/40 bg-primary/10 text-primary",
+  confirmed: "border-ink/25 bg-hivis text-ink",
+  completed: "border-border bg-secondary text-muted-foreground",
+  cancelled: "border-destructive/40 bg-destructive/10 text-destructive",
 };
 
 export function JobStatusBadge({ status }: { status: JobStatus }) {
@@ -66,11 +67,11 @@ export function JobStatusBadge({ status }: { status: JobStatus }) {
 }
 
 const callOutcomeStyles: Record<CallOutcome, string> = {
-  booked: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
-  lead_only: "border-sky-400/30 bg-sky-400/10 text-sky-200",
-  callback_required: "border-amber-400/30 bg-amber-400/10 text-amber-200",
-  spam: "border-white/12 bg-white/5 text-white/55",
-  failed: "border-red-400/35 bg-red-400/10 text-red-200",
+  booked: "border-ink/25 bg-hivis text-ink",
+  lead_only: "border-primary/40 bg-primary/10 text-primary",
+  callback_required: "border-[#b08900]/60 bg-[#f0e3b8] text-ink",
+  spam: "border-border bg-secondary text-muted-foreground",
+  failed: "border-destructive/40 bg-destructive/10 text-destructive",
 };
 
 export function CallOutcomeBadge({
@@ -90,11 +91,16 @@ export function CallOutcomeBadge({
   );
 }
 
+/*
+ * Source says where a lead came from, not how urgent it is, so it stays quiet:
+ * the icon and label carry it. Fills are reserved for status, which is what an
+ * owner scans a row for.
+ */
 const leadSourceStyles: Record<LeadSource, string> = {
-  phone: "border-sky-400/30 bg-sky-400/10 text-sky-200",
-  // Marketplace leads wear the brand accent — they came from our own funnel.
-  marketplace: "border-brand-to/45 bg-brand-to/12 text-pink-200",
-  manual: "border-white/12 bg-white/5 text-white/55",
+  phone: "border-primary/35 bg-transparent text-primary",
+  marketplace:
+    "border-foreground/35 border-dashed bg-transparent text-foreground",
+  manual: "border-border bg-transparent text-muted-foreground",
 };
 
 const leadSourceIcons: Record<LeadSource, typeof Phone> = {
@@ -114,9 +120,9 @@ export function LeadSourceBadge({ source }: { source: LeadSource }) {
 }
 
 const urgencyStyles: Record<LeadUrgency, string> = {
-  emergency: "border-red-400/40 bg-red-400/12 text-red-200",
-  urgent: "border-amber-400/30 bg-amber-400/10 text-amber-200",
-  routine: "border-white/12 bg-white/5 text-white/55",
+  emergency: "border-destructive/45 bg-destructive/12 text-destructive",
+  urgent: "border-[#b08900]/60 bg-[#f0e3b8] text-ink",
+  routine: "border-border bg-secondary text-muted-foreground",
 };
 
 export function UrgencyBadge({ urgency }: { urgency: LeadUrgency }) {
@@ -128,10 +134,10 @@ export function UrgencyBadge({ urgency }: { urgency: LeadUrgency }) {
 }
 
 const messageStatusStyles: Record<MessageStatus, string> = {
-  queued: "border-amber-400/30 bg-amber-400/10 text-amber-200",
-  sent: "border-sky-400/30 bg-sky-400/10 text-sky-200",
-  delivered: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
-  failed: "border-red-400/35 bg-red-400/10 text-red-200",
+  queued: "border-[#b08900]/60 bg-[#f0e3b8] text-ink",
+  sent: "border-primary/40 bg-primary/10 text-primary",
+  delivered: "border-ink/25 bg-hivis text-ink",
+  failed: "border-destructive/40 bg-destructive/10 text-destructive",
 };
 
 export function MessageStatusBadge({ status }: { status: MessageStatus }) {

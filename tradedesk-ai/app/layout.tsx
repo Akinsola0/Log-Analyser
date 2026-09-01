@@ -1,24 +1,28 @@
 import type { Metadata } from "next";
-import { Archivo, Geist, Geist_Mono } from "next/font/google";
+import { Barlow, Barlow_Condensed, Courier_Prime } from "next/font/google";
 
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+/* Body: workmanlike grotesque, squared terminals. */
+const barlow = Barlow({
+  variable: "--font-barlow",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+/* Display: condensed, the way van signage and site notices are set. */
+const barlowCondensed = Barlow_Condensed({
+  variable: "--font-barlow-condensed",
   subsets: ["latin"],
+  weight: ["600", "700"],
 });
 
-/** Display face for the oversized uppercase headlines. */
-const archivo = Archivo({
-  variable: "--font-archivo",
+/* Data: the typewriter the docket was printed on. */
+const courier = Courier_Prime({
+  variable: "--font-courier",
   subsets: ["latin"],
-  weight: ["600", "700", "800", "900"],
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -42,7 +46,7 @@ export default function RootLayout({
     // mismatches anywhere inside the app are still reported.
     <html
       lang="en-IE"
-      className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable} h-full antialiased`}
+      className={`${barlow.variable} ${barlowCondensed.variable} ${courier.variable} h-full antialiased`}
       // Tells Next the smooth scrolling in globals.css is deliberate, so it
       // doesn't warn about route transitions animating.
       data-scroll-behavior="smooth"

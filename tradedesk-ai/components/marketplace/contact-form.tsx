@@ -69,18 +69,18 @@ export function ContactForm({ profile }: { profile: MarketplaceProfile }) {
 
   if (sent) {
     return (
-      <div className="rounded-2xl border border-emerald-400/30 bg-emerald-400/10 p-5">
-        <p className="flex items-center gap-2 font-semibold text-emerald-200">
+      <div className="border-ink/20 bg-hivis/35 rounded border p-5">
+        <p className="text-ink flex items-center gap-2 font-semibold">
           <CheckCircle2 className="size-5" aria-hidden />
           Sent to {profile.business_name}
         </p>
-        <p className="mt-2 text-sm text-emerald-100/90">
+        <p className="text-ink mt-2 text-sm">
           They usually reply within <strong>{sent.minutes} minutes</strong>.
           You&apos;ll get a {messageChannelLabels[form.preferred_channel]}{" "}
           message on {form.customer_phone} when they confirm a time — nothing is
           booked until then.
         </p>
-        <p className="mt-3 text-sm text-emerald-100/70">
+        <p className="text-ink/80 mt-3 text-sm">
           In a hurry?{" "}
           <a
             href={`tel:${profile.phone}`}

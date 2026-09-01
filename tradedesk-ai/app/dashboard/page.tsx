@@ -116,13 +116,13 @@ export default function DashboardOverviewPage() {
               <li key={stat.label} className="h-full">
                 <Card className="h-full gap-2 py-5">
                   <CardHeader className="px-4">
-                    <CardDescription className="kicker flex items-center gap-1.5 text-[0.65rem]">
+                    <CardDescription className="field-label flex items-center gap-1.5">
                       <stat.icon className="size-3.5" aria-hidden />
                       {stat.label}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="px-4">
-                    <p className="display text-4xl">{stat.value}</p>
+                    <p className="typed text-3xl font-bold">{stat.value}</p>
                   </CardContent>
                 </Card>
               </li>
