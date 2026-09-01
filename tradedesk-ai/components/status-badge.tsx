@@ -69,7 +69,8 @@ export function JobStatusBadge({ status }: { status: JobStatus }) {
 const callOutcomeStyles: Record<CallOutcome, string> = {
   booked: "border-ink/25 bg-hivis text-ink",
   lead_only: "border-primary/40 bg-primary/10 text-primary",
-  callback_required: "border-[#b08900]/60 bg-[#f0e3b8] text-ink",
+  callback_required:
+    "border-[var(--warn-border)] bg-[var(--warn-bg)] text-[var(--warn-fg)]",
   spam: "border-border bg-secondary text-muted-foreground",
   failed: "border-destructive/40 bg-destructive/10 text-destructive",
 };
@@ -121,7 +122,8 @@ export function LeadSourceBadge({ source }: { source: LeadSource }) {
 
 const urgencyStyles: Record<LeadUrgency, string> = {
   emergency: "border-destructive/45 bg-destructive/12 text-destructive",
-  urgent: "border-[#b08900]/60 bg-[#f0e3b8] text-ink",
+  urgent:
+    "border-[var(--warn-border)] bg-[var(--warn-bg)] text-[var(--warn-fg)]",
   routine: "border-border bg-secondary text-muted-foreground",
 };
 
@@ -134,7 +136,8 @@ export function UrgencyBadge({ urgency }: { urgency: LeadUrgency }) {
 }
 
 const messageStatusStyles: Record<MessageStatus, string> = {
-  queued: "border-[#b08900]/60 bg-[#f0e3b8] text-ink",
+  queued:
+    "border-[var(--warn-border)] bg-[var(--warn-bg)] text-[var(--warn-fg)]",
   sent: "border-primary/40 bg-primary/10 text-primary",
   delivered: "border-ink/25 bg-hivis text-ink",
   failed: "border-destructive/40 bg-destructive/10 text-destructive",

@@ -1,28 +1,21 @@
 import type { Metadata } from "next";
-import { Barlow, Barlow_Condensed, Courier_Prime } from "next/font/google";
+import { Inter, Manrope } from "next/font/google";
 
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-/* Body: workmanlike grotesque, squared terminals. */
-const barlow = Barlow({
-  variable: "--font-barlow",
+/* Body: neutral, extremely legible workhorse. */
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
 
-/* Display: condensed, the way van signage and site notices are set. */
-const barlowCondensed = Barlow_Condensed({
-  variable: "--font-barlow-condensed",
+/* Display: confident, rounded, modern — used with restraint. */
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
-  weight: ["600", "700"],
-});
-
-/* Data: the typewriter the docket was printed on. */
-const courier = Courier_Prime({
-  variable: "--font-courier",
-  subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -46,7 +39,7 @@ export default function RootLayout({
     // mismatches anywhere inside the app are still reported.
     <html
       lang="en-IE"
-      className={`${barlow.variable} ${barlowCondensed.variable} ${courier.variable} h-full antialiased`}
+      className={`${inter.variable} ${manrope.variable} h-full antialiased`}
       // Tells Next the smooth scrolling in globals.css is deliberate, so it
       // doesn't warn about route transitions animating.
       data-scroll-behavior="smooth"

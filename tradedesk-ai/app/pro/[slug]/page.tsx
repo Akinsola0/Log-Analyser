@@ -53,7 +53,7 @@ export default async function ProPage({ params }: ProPageProps) {
       <SiteHeader />
       <main id="main" className="flex-1">
         <div className="border-b">
-          <div className="mx-auto w-full max-w-[80rem] px-4 py-12 sm:px-8">
+          <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6">
             <nav
               aria-label="Breadcrumb"
               className="text-muted-foreground text-sm"
@@ -132,7 +132,7 @@ export default async function ProPage({ params }: ProPageProps) {
           </div>
         </div>
 
-        <div className="mx-auto grid w-full max-w-[80rem] gap-12 px-4 py-12 sm:px-8 lg:grid-cols-[1fr_23rem]">
+        <div className="mx-auto grid w-full max-w-7xl gap-12 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_23rem]">
           <div className="space-y-10">
             <section>
               <h2 className="display text-2xl">About</h2>
@@ -163,7 +163,9 @@ export default async function ProPage({ params }: ProPageProps) {
                       </p>
                     </div>
                     <p className="text-right whitespace-nowrap">
-                      <span className="field-label block">From</span>
+                      <span className="text-muted-foreground block text-xs font-medium">
+                        From
+                      </span>
                       <span className="typed mt-1 block text-2xl font-bold">
                         {formatEuro(service.from_price_cents)}
                       </span>

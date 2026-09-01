@@ -72,9 +72,9 @@ Next.js (App Router) · TypeScript · Tailwind CSS v4 · shadcn/ui components (v
 
 ## Conventions
 
-- One theme — **the docket system**, defined as tokens in `app/globals.css`: manila paper, carbon ink, biro blue, hi-vis, workshop slate. Don't hardcode colours in components.
-- `.band-dark` re-declares the same token names for dark sections, so a Button or Card dropped inside one re-colours itself — including swapping the accent from biro to hi-vis, because biro only reaches 1.6:1 on slate.
-- Hi-vis is never text on paper (1.0:1). It is only ever a fill with ink on top — the `.marker` highlighter and the "booked" badges.
-- Type has three roles: `.display` (Barlow Condensed, uppercase — signage), body (Barlow), and `.typed` / `.field-label` (Courier Prime — anything printed on a docket: times, prices, phone numbers, reference codes).
+- One theme, defined as tokens in `app/globals.css`: white/near-white surfaces, charcoal ink, and a single burnt-orange accent pulled from the workwear a trade actually uses on site (not an arbitrary brand colour). Don't hardcode colours in components.
+- `.band-dark` gives a section a dark charcoal background with light text, for rhythm between long light stretches (the cost-comparison table, the footer, CTA bands). It's a light reskin of the same token names, so a Card or Badge dropped inside re-colours itself.
+- Headlines use the `.display` class (Manrope, bold, sentence case); small letterspaced eyebrows use `.kicker`. Body copy is Inter throughout — two font families, no more.
+- The homepage hero is a full-bleed photo (Booksy-style: dark scrim, white centred headline, a single search pill, a row of trade chips) — see `public/images/README.md` for the exact file it's waiting on.
 - Money is integer euro cents everywhere; format with `formatEuro()` in `lib/format.ts`.
 - Copy is written for a tradesman, in plain language: "missed call", "booked job", "burst pipe" — never "leverage your workflow".

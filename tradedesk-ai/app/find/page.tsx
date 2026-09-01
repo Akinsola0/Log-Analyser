@@ -25,9 +25,9 @@ export default async function FindIndexPage() {
       <SiteHeader />
       <main id="main" className="flex-1">
         <section className="border-b">
-          <div className="mx-auto w-full max-w-[86rem] px-4 py-14 sm:px-8">
-            <p className="field-label">The marketplace</p>
-            <h1 className="display mt-4 text-[clamp(2.4rem,1.6rem+3vw,4rem)]">
+          <div className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6">
+            <p className="kicker">The marketplace</p>
+            <h1 className="display mt-4 text-4xl sm:text-5xl">
               Find a tradesman who answers
             </h1>
             <p className="text-muted-foreground mt-4 max-w-2xl">
@@ -37,7 +37,7 @@ export default async function FindIndexPage() {
               someone.
             </p>
 
-            <div className="docket mt-9 px-5 pt-7 pb-6 sm:px-6">
+            <div className="mt-9 max-w-2xl">
               <HeroSearch categories={categories} locations={locations} />
             </div>
           </div>
@@ -51,8 +51,8 @@ export default async function FindIndexPage() {
         />
 
         <section className="border-t">
-          <div className="mx-auto w-full max-w-[86rem] px-4 py-16 sm:px-8">
-            <h2 className="display text-4xl">Towns we cover</h2>
+          <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6">
+            <h2 className="display text-3xl sm:text-4xl">Towns we cover</h2>
             <p className="text-muted-foreground mt-3">
               More towns as trades sign up. Links go to plumbers — swap the
               trade once you&apos;re there.

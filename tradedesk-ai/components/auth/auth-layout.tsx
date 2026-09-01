@@ -45,7 +45,7 @@ export function AuthLayout({
           Now the phone gets answered while I&apos;m under a sink and the
           job&apos;s in the diary before I&apos;m back in the van.
         </p>
-        <p className="field-label mt-5">
+        <p className="kicker mt-5 text-white/60">
           Dermot Kelly · Kelly Plumbing &amp; Heating, Naas
         </p>
 

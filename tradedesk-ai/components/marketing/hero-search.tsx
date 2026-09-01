@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -13,18 +11,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import type { MarketplaceCategory, MarketplaceLocation } from "@/lib/api";
 
+const segmentTrigger =
+  "h-auto w-full border-0 bg-transparent px-0 py-0 shadow-none focus-visible:ring-0 [&_svg]:hidden";
+
 /**
- * Browse before you commit to a form: two pickers, no name or email, straight
- * into the results page.
+ * One seamless white pill — a trade picker, a location picker, and a round
+ * search button — rather than a free-text box, since routing needs a real
+ * category and town rather than parsed text.
  */
 export function HeroSearch({
   categories,
   locations,
+  className,
 }: {
   categories: MarketplaceCategory[];
   locations: MarketplaceLocation[];
+  className?: string;
 }) {
   const router = useRouter();
   const [category, setCategory] = useState<string>(
@@ -36,57 +41,60 @@ export function HeroSearch({
 
   return (
     <form
-      className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]"
+      className={cn(
+        "flex w-full items-stretch rounded-full bg-white p-2 shadow-[0_18px_45px_-20px_rgba(0,0,0,0.45)]",
+        className,
+      )}
       onSubmit={(event) => {
         event.preventDefault();
         router.push(`/find/${category}/${location}`);
       }}
     >
-      <div className="grid gap-1.5">
-        <Label htmlFor="hero-trade" className="field-label">
-          What do you need?
-        </Label>
-        <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger id="hero-trade" className="w-full">
-            <SelectValue placeholder="Pick a trade" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((item) => (
-              <SelectItem key={item.slug} value={item.slug}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <Select value={category} onValueChange={setCategory}>
+        <SelectTrigger
+          className={cn(
+            segmentTrigger,
+            "text-foreground pl-4 text-sm font-medium",
+          )}
+        >
+          <SelectValue placeholder="What do you need?" />
+        </SelectTrigger>
+        <SelectContent>
+          {categories.map((item) => (
+            <SelectItem key={item.slug} value={item.slug}>
+              {item.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
-      <div className="grid gap-1.5">
-        <Label htmlFor="hero-location" className="field-label">
-          Where?
-        </Label>
-        <Select value={location} onValueChange={setLocation}>
-          <SelectTrigger id="hero-location" className="w-full">
-            <SelectValue placeholder="Pick a town" />
-          </SelectTrigger>
-          <SelectContent>
-            {locations.map((item) => (
-              <SelectItem key={item.slug} value={item.slug}>
-                {item.town}, Co. {item.county}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <span aria-hidden className="bg-border my-1.5 w-px shrink-0" />
 
-      <div className="grid gap-1.5">
-        <span aria-hidden className="hidden text-xs sm:block">
-          &nbsp;
-        </span>
-        <Button type="submit" size="lg" className="w-full sm:w-auto">
-          <Search />
-          Search
-        </Button>
-      </div>
+      <Select value={location} onValueChange={setLocation}>
+        <SelectTrigger
+          className={cn(
+            segmentTrigger,
+            "text-muted-foreground pl-4 text-sm font-medium",
+          )}
+        >
+          <SelectValue placeholder="Where?" />
+        </SelectTrigger>
+        <SelectContent>
+          {locations.map((item) => (
+            <SelectItem key={item.slug} value={item.slug}>
+              {item.town}, Co. {item.county}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <button
+        type="submit"
+        aria-label="Search"
+        className="bg-primary text-primary-foreground flex size-11 shrink-0 items-center justify-center rounded-full transition hover:brightness-110"
+      >
+        <Search className="size-4" />
+      </button>
     </form>
   );
 }

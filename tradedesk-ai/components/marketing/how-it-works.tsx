@@ -1,47 +1,31 @@
 import { howItWorksSteps } from "@/lib/marketing";
 
-/**
- * Numbered because this genuinely is a sequence — the order is what the reader
- * needs. Set as docket line numbers rather than decorative markers.
- */
 export function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="mx-auto w-full max-w-[86rem] px-4 py-16 sm:px-8 md:py-24"
+      className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 md:py-24"
     >
-      <div className="grid gap-10 lg:grid-cols-[26rem_1fr] lg:items-start">
-        <div className="lg:sticky lg:top-28">
-          <p className="field-label">For tradespeople</p>
-          <h2 className="display mt-4 text-[clamp(2rem,1.4rem+2.4vw,3.25rem)]">
-            One call, start to finish
-          </h2>
-          <p className="text-muted-foreground mt-4 max-w-[46ch]">
-            No app for your customers to download, no new number, no
-            receptionist to train. You divert your calls and get on with the
-            job.
-          </p>
-        </div>
+      <p className="kicker">For tradespeople</p>
+      <h2 className="display mt-3 max-w-3xl text-3xl sm:text-4xl">
+        An AI front desk that knows what a zone valve is
+      </h2>
+      <p className="text-muted-foreground mt-3 max-w-xl">
+        No apps for your customers to download, no new number, no receptionist
+        to train. You divert your calls and get on with the job.
+      </p>
 
-        <ol className="divide-y border-t">
-          {howItWorksSteps.map((step, index) => (
-            <li
-              key={step.title}
-              className="grid gap-x-6 gap-y-2 py-7 sm:grid-cols-[4rem_1fr]"
-            >
-              <span className="typed text-muted-foreground text-sm">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <div>
-                <h3 className="display text-xl">{step.title}</h3>
-                <p className="text-muted-foreground mt-2 max-w-[62ch]">
-                  {step.body}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </div>
+      <ol className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {howItWorksSteps.map((step, index) => (
+          <li key={step.title} className="border-t-2 border-primary/20 pt-4">
+            <span className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-full text-sm font-bold">
+              {index + 1}
+            </span>
+            <h3 className="mt-3 font-semibold">{step.title}</h3>
+            <p className="text-muted-foreground mt-1.5 text-sm">{step.body}</p>
+          </li>
+        ))}
+      </ol>
     </section>
   );
 }

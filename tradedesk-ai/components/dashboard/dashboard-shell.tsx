@@ -123,9 +123,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <PhoneIncoming className="size-3.5" aria-hidden />
                 AI answering on
               </p>
-              <p className="typed mt-1">
-                {formatPhone(session.business.phone)}
-              </p>
+              <p className="mt-1">{formatPhone(session.business.phone)}</p>
             </>
           ) : null}
         </div>
@@ -160,7 +158,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   <p className="display truncate text-lg">
                     {session.business.name}
                   </p>
-                  <p className="field-label truncate">
+                  <p className="text-muted-foreground truncate text-xs font-medium">
                     {tradeTypeLabels[session.business.trade_type]} ·{" "}
                     {session.business.timezone}
                   </p>

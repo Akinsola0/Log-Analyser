@@ -16,27 +16,23 @@ import {
 } from "@/lib/marketing";
 
 /**
- * The cost of a missed call, a receptionist, and us — with the arithmetic
- * shown rather than asserted. On the dark band the accent is hi-vis: biro only
- * reaches 1.6:1 here.
+ * The cost of a missed call, a receptionist, and us — side by side, with the
+ * arithmetic shown rather than asserted.
  */
 export function CostComparison() {
   return (
     <section id="compare" className="band-dark">
-      <div className="mx-auto w-full max-w-[86rem] px-4 py-16 sm:px-8 md:py-24">
-        <div className="grid gap-12 lg:grid-cols-[24rem_1fr] lg:items-start">
+      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 md:py-24">
+        <div className="grid gap-10 lg:grid-cols-[22rem_1fr] lg:items-start">
           <div>
-            <p className="field-label">The maths</p>
-            <h2 className="display mt-4 text-[clamp(2rem,1.4rem+2.4vw,3.25rem)]">
+            <p className="kicker">The maths</p>
+            <h2 className="display mt-3 text-3xl sm:text-4xl">
               What a missed call really costs
             </h2>
-
-            <p className="typed mt-8 text-[clamp(3rem,2rem+4vw,4.5rem)] leading-none font-bold">
-              <span className="marker">
-                {formatEuro(missedCallCostPerMonthCents)}
-              </span>
+            <p className="mt-6 text-6xl font-extrabold tracking-tight sm:text-7xl">
+              {formatEuro(missedCallCostPerMonthCents)}
             </p>
-            <p className="text-muted-foreground mt-4 max-w-[42ch] text-sm">
+            <p className="text-muted-foreground mt-3 max-w-sm text-sm">
               {MISSED_CALL_MATHS.missedCallsPerWeek} missed calls a week, at an
               average call-out of{" "}
               {formatEuro(MISSED_CALL_MATHS.averageJobValueCents)}, is that much
@@ -45,14 +41,14 @@ export function CostComparison() {
             </p>
           </div>
 
-          <div className="overflow-hidden border">
-            <Table className="min-w-[44rem]">
+          <div className="overflow-hidden rounded-2xl border">
+            <Table className="min-w-[42rem]">
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="w-[28%]">&nbsp;</TableHead>
                   <TableHead className="w-[24%]">Missing the call</TableHead>
                   <TableHead className="w-[24%]">A receptionist</TableHead>
-                  <TableHead className="text-foreground w-[24%] bg-white/5">
+                  <TableHead className="text-primary w-[24%] bg-white/5">
                     TradeDesk AI
                   </TableHead>
                 </TableRow>
@@ -60,7 +56,7 @@ export function CostComparison() {
               <TableBody>
                 {comparisonRows.map((row) => (
                   <TableRow key={row.label}>
-                    <TableCell className="text-muted-foreground font-semibold">
+                    <TableCell className="text-muted-foreground font-medium">
                       {row.label}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
@@ -76,7 +72,7 @@ export function CostComparison() {
                       <span className="flex items-start gap-2">
                         {row.tradedeskWins ? (
                           <Check
-                            className="text-hivis mt-0.5 size-4 shrink-0"
+                            className="mt-0.5 size-4 shrink-0 text-[#3ddc8a]"
                             aria-hidden
                           />
                         ) : null}
@@ -90,7 +86,7 @@ export function CostComparison() {
           </div>
         </div>
 
-        <p className="text-muted-foreground mt-6 max-w-[80ch] text-xs">
+        <p className="text-muted-foreground mt-6 max-w-3xl text-xs">
           Receptionist figure is a full-time salary plus employer PRSI at Irish
           market rates. Missed-call figure uses the average call-out value our
           trades report — change the assumption and the sum changes, but the

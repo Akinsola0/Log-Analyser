@@ -16,13 +16,19 @@ const tradeLinks = [
   { href: "/signup", label: "Create an account" },
 ];
 
+const companyLinks = [
+  { href: "/about", label: "About" },
+  { href: "/find", label: "Marketplace" },
+  { href: "/login", label: "Sign in" },
+];
+
 export function SiteFooter() {
   return (
     <footer className="band-dark mt-auto">
-      <div className="mx-auto grid w-full max-w-[86rem] gap-10 px-4 py-16 sm:px-8 md:grid-cols-4">
+      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-4">
         <div className="md:col-span-2">
-          <Logo />
-          <p className="text-muted-foreground mt-4 max-w-sm text-sm">
+          <Logo tone="light" />
+          <p className="mt-3 max-w-sm text-sm text-white/65">
             The AI front desk for Irish trades — and the marketplace where
             homeowners find them. Built in Ireland, for plumbers, electricians,
             handymen and everyone else who can&apos;t answer a phone with two
@@ -31,14 +37,11 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <h2 className="field-label">I need a tradesman</h2>
-          <ul className="mt-4 space-y-2.5 text-sm">
+          <h2 className="kicker text-white/50">I need a tradesman</h2>
+          <ul className="mt-3 space-y-2 text-sm text-white/75">
             {homeownerLinks.map((link) => (
               <li key={link.href}>
-                <Link
-                  className="text-muted-foreground hover:text-foreground rounded transition-colors"
-                  href={link.href}
-                >
+                <Link className="rounded hover:text-white" href={link.href}>
                   {link.label}
                 </Link>
               </li>
@@ -47,14 +50,11 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <h2 className="field-label">I am a tradesman</h2>
-          <ul className="mt-4 space-y-2.5 text-sm">
+          <h2 className="kicker text-white/50">I am a tradesman</h2>
+          <ul className="mt-3 space-y-2 text-sm text-white/75">
             {tradeLinks.map((link) => (
               <li key={link.href}>
-                <Link
-                  className="text-muted-foreground hover:text-foreground rounded transition-colors"
-                  href={link.href}
-                >
+                <Link className="rounded hover:text-white" href={link.href}>
                   {link.label}
                 </Link>
               </li>
@@ -63,11 +63,22 @@ export function SiteFooter() {
         </div>
       </div>
 
-      <div className="border-t">
-        <div className="text-muted-foreground typed mx-auto flex w-full max-w-[86rem] flex-col gap-2 px-4 py-6 text-xs sm:flex-row sm:items-center sm:justify-between sm:px-8">
+      <div className="border-t border-white/10">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-6 text-xs text-white/55 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>
             © {new Date().getFullYear()} TradeDesk AI. Registered in Ireland.
           </p>
+          <nav aria-label="Company" className="flex gap-4">
+            {companyLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="hover:text-white"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
           <p>Prices shown exclude VAT. Cancel any time in your first month.</p>
         </div>
       </div>

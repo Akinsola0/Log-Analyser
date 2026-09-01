@@ -14,53 +14,71 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 
 /** Both audiences are one click from the first screen — neither is buried. */
 const navLinks = [
   { href: "/find", label: "Find a tradesman" },
-  { href: "/#how-it-works", label: "How it works" },
+  { href: "/about", label: "About" },
   { href: "/#pricing", label: "Pricing" },
   { href: "/#compare", label: "Compare" },
 ];
 
-export function SiteHeader() {
+/**
+ * `overlay` renders transparent with white text, for sitting directly on the
+ * homepage hero photo — it turns solid the moment the page scrolls past the
+ * hero, same pattern Booksy uses. Every other page uses the solid default.
+ */
+export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="bg-background/92 sticky top-0 z-40 border-b backdrop-blur">
-      <div className="mx-auto flex h-16 w-full max-w-[86rem] items-center justify-between gap-4 px-4 sm:px-8">
-        <Logo />
+    <header
+      className={cn(
+        "z-40 w-full",
+        overlay
+          ? "absolute top-0 left-0"
+          : "bg-background/95 sticky top-0 border-b backdrop-blur",
+      )}
+    >
+      <div className="mx-auto flex h-18 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+        <Logo tone={overlay ? "light" : "dark"} />
 
         <nav
           aria-label="Main"
-          className="hidden items-center gap-8 text-sm font-medium md:flex"
+          className={cn(
+            "hidden items-center gap-1 md:flex",
+            overlay && "[&_a]:text-white [&_a]:hover:bg-white/10",
+          )}
         >
           {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="hover:text-primary rounded underline-offset-4 transition-colors hover:underline"
-            >
-              {link.label}
-            </Link>
+            <Button key={link.href} asChild variant="ghost" size="sm">
+              <Link href={link.href}>{link.label}</Link>
+            </Button>
           ))}
         </nav>
 
-        <div className="hidden items-center gap-4 md:flex">
-          <Link
-            href="/login"
-            className="hover:text-primary rounded text-sm font-medium underline-offset-4 transition-colors hover:underline"
+        <div className="hidden items-center gap-2 md:flex">
+          <Button
+            asChild
+            variant={overlay ? "ghost" : "ghost"}
+            size="sm"
+            className={overlay ? "text-white hover:bg-white/10" : undefined}
           >
-            Sign in
-          </Link>
-          <Button asChild size="sm">
+            <Link href="/login">Sign in</Link>
+          </Button>
+          <Button asChild size="sm" variant={overlay ? "invert" : "default"}>
             <Link href="/signup">Get started</Link>
           </Button>
         </div>
 
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild className="md:hidden">
-            <Button variant="outline" size="icon" aria-label="Open menu">
+            <Button
+              variant={overlay ? "invert" : "outline"}
+              size="icon"
+              aria-label="Open menu"
+            >
               <Menu />
             </Button>
           </SheetTrigger>
@@ -73,7 +91,7 @@ export function SiteHeader() {
                 <SheetClose asChild key={link.href}>
                   <Link
                     href={link.href}
-                    className="hover:bg-secondary rounded px-3 py-2 font-medium"
+                    className="hover:bg-secondary rounded-lg px-3 py-2 font-medium"
                   >
                     {link.label}
                   </Link>

@@ -32,7 +32,7 @@ export function AttentionList({ items }: { items: AttentionItem[] }) {
               "group flex items-start gap-3 rounded border p-4 transition-colors",
               item.severity === "error"
                 ? "border-destructive/40 bg-destructive/8 hover:bg-destructive/12"
-                : "border-[#b08900]/50 bg-[#f0e3b8]/60 hover:bg-[#f0e3b8]",
+                : "border-[var(--warn-border)] bg-[var(--warn-bg)] hover:brightness-97",
             )}
           >
             <span

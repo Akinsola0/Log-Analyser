@@ -210,3 +210,49 @@ export const trustSignals = [
     body: "Cancel inside the first month and we refund it. No setup fee and no contract.",
   },
 ];
+
+/* -------------------------------------------------------------------------- */
+/* About page content                                                         */
+/* -------------------------------------------------------------------------- */
+
+export const aboutStats = [
+  { value: "2023", label: "Founded" },
+  { value: "1,200+", label: "Verified trades" },
+  { value: "24/7", label: "Calls answered" },
+  { value: "€2,400", label: "Avg. lost per month to a missed call" },
+];
+
+export const aboutStoryBlocks = [
+  {
+    eyebrow: "Why we started",
+    title: "A missed call is a lost job, every time",
+    body: "We watched good tradespeople lose work to voicemail — not because they weren't good at the job, but because they were up a ladder when the phone rang. The homeowner just called the next name on the list. TradeDesk AI exists to close that gap: answer every call, get the job into the diary, and let the tradesman find out about it once the ladder's folded up.",
+  },
+  {
+    eyebrow: "How we work",
+    title: "Verified trades, real reviews, no exceptions",
+    body: "Every profile on the marketplace is checked for insurance and registration before it goes live. Every review comes from a customer with a completed job — nobody can buy their way to five stars. And when the AI gets a call wrong, the tradesman corrects it in one click; we use that correction to make the next call better, not to bury the mistake.",
+  },
+];
+
+export const companyValues = [
+  "Answer every call, first ring to last — no exceptions for time of day.",
+  "Never book a job into a slot a tradesman hasn't actually got.",
+  "Real reviews from completed jobs, or no reviews at all.",
+  "Plain language on the phone and on the page — no jargon either side.",
+];
+
+export interface TeamMember {
+  name: string;
+  role: string;
+  initials: string;
+}
+
+export const teamMembers: TeamMember[] = [
+  { name: "Aoife Ryan", role: "Co-founder & CEO", initials: "AR" },
+  { name: "Cian Doyle", role: "Co-founder & Head of AI", initials: "CD" },
+  { name: "Niamh Butler", role: "Head of Trades Success", initials: "NB" },
+  { name: "Darragh Fitzgerald", role: "Head of Product", initials: "DF" },
+  { name: "Saoirse Malone", role: "Head of Marketplace Trust", initials: "SM" },
+  { name: "Tomás Nolan", role: "Head of Engineering", initials: "TN" },
+];

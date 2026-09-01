@@ -8,7 +8,6 @@ import { Pricing } from "@/components/marketing/pricing";
 import { Reviews } from "@/components/marketing/reviews";
 import { TrustStrip } from "@/components/marketing/trust-strip";
 import { SiteFooter } from "@/components/site/site-footer";
-import { SiteHeader } from "@/components/site/site-header";
 import { getCategories, getFeaturedReviews, getLocations } from "@/lib/api";
 
 export default async function HomePage() {
@@ -20,7 +19,6 @@ export default async function HomePage() {
 
   return (
     <>
-      <SiteHeader />
       <main id="main" className="flex-1">
         <Hero categories={categories} locations={locations} />
         <TrustStrip />

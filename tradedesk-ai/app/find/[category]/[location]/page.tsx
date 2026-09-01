@@ -66,7 +66,7 @@ export default async function FindPage({ params }: FindPageProps) {
       <SiteHeader />
       <main id="main" className="flex-1">
         <div className="border-b">
-          <div className="mx-auto w-full max-w-[80rem] px-4 py-12 sm:px-8">
+          <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6">
             <nav
               aria-label="Breadcrumb"
               className="text-muted-foreground text-sm"
@@ -95,7 +95,7 @@ export default async function FindPage({ params }: FindPageProps) {
           </div>
         </div>
 
-        <div className="mx-auto w-full max-w-[80rem] px-4 py-10 sm:px-8">
+        <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
           <SearchResults
             category={category}
             location={town.slug}
@@ -105,7 +105,7 @@ export default async function FindPage({ params }: FindPageProps) {
           <section className="mt-14 grid gap-8 border-t pt-10 md:grid-cols-2">
             {nearbyTowns.length > 0 ? (
               <div>
-                <h2 className="field-label">{match.plural} in nearby towns</h2>
+                <h2 className="kicker">{match.plural} in nearby towns</h2>
                 <ul className="mt-3 space-y-2 text-sm">
                   {nearbyTowns.map((item) => (
                     <li key={item.slug}>
@@ -122,7 +122,7 @@ export default async function FindPage({ params }: FindPageProps) {
             ) : null}
 
             <div>
-              <h2 className="field-label">Other trades in {town.town}</h2>
+              <h2 className="kicker">Other trades in {town.town}</h2>
               <ul className="mt-3 space-y-2 text-sm">
                 {otherCategories.map((item) => (
                   <li key={item.slug}>
