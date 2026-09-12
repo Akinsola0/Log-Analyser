@@ -34,6 +34,14 @@ Full-bleed photo hero (Booksy-style): a transparent header over a darkened photo
 
 A row of small credibility markers directly under the hero.
 
+### Audience split
+
+![Audience split](screenshots/audience-split.png)
+
+**File:** [`components/marketing/audience-split.tsx`](../components/marketing/audience-split.tsx)
+
+The two-audience pitch, right under the trust strip: a homeowner panel (find a tradesman) and a business panel (TradeDesk AI for your business), so a visitor sorts themselves in one glance. Each panel's photo is a local-only file — see [`public/images/README.md`](../public/images/README.md) (`audience-homeowner.jpg` / `audience-business.jpg`); the fallback tile shown here uses the same `bg-card` pattern as the hero and About photos.
+
 ### Category grid
 
 ![Category grid](screenshots/category-grid.png)

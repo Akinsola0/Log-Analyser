@@ -1,3 +1,4 @@
+import { AudienceSplit } from "@/components/marketing/audience-split";
 import { CategoryGrid } from "@/components/marketing/category-grid";
 import { CostComparison } from "@/components/marketing/cost-comparison";
 import { CtaBand } from "@/components/marketing/cta-band";
@@ -22,6 +23,7 @@ export default async function HomePage() {
       <main id="main" className="flex-1">
         <Hero categories={categories} locations={locations} />
         <TrustStrip />
+        <AudienceSplit />
         <CategoryGrid
           categories={categories}
           defaultLocation={locations[0]?.slug ?? "naas"}
