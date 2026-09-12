@@ -47,8 +47,15 @@ function Panel({
     <div
       className={cn(
         "flex flex-col items-center px-6 py-16 text-center sm:px-10 md:py-24",
-        dark ? "band-dark bg-[var(--overlay)]" : "bg-secondary/60",
+        dark ? "band-dark" : "bg-secondary/60",
       )}
+      // A warm charcoal-brown rather than .band-dark's default near-black
+      // overlay — the same tone used as the hero photo's fallback colour,
+      // so the page's one dark tone stays consistent rather than adding a
+      // second one. An inline style wins outright, rather than depending on
+      // Tailwind's utility-vs-component layer ordering to beat .band-dark's
+      // own `background` rule.
+      style={dark ? { backgroundColor: "#3a352f" } : undefined}
     >
       <p className="kicker">{eyebrow}</p>
       <h2 className="display mt-3 text-2xl sm:text-3xl">{title}</h2>

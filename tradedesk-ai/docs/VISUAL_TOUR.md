@@ -26,21 +26,21 @@ Composed in [`app/page.tsx`](../app/page.tsx), section by section:
 
 Full-bleed photo hero (Booksy-style): a transparent header over a darkened photo, a centred headline, one search pill, and a row of trade chips. The animated tool-assembly badge top-right is [`components/marketing/tool-badge.tsx`](../components/marketing/tool-badge.tsx) — a Canvas 2D particle animation that assembles into a spanner/screwdriver emblem, then holds with a soft glow (static on `prefers-reduced-motion`). The search pill itself is [`components/marketing/hero-search.tsx`](../components/marketing/hero-search.tsx); the transparent nav bar is [`components/site/site-header.tsx`](../components/site/site-header.tsx) (`overlay` prop).
 
-### Trust strip
-
-![Trust strip](screenshots/trust-strip.png)
-
-**File:** [`components/marketing/trust-strip.tsx`](../components/marketing/trust-strip.tsx)
-
-A row of small credibility markers directly under the hero.
-
 ### Audience split
 
 ![Audience split](screenshots/audience-split.png)
 
 **File:** [`components/marketing/audience-split.tsx`](../components/marketing/audience-split.tsx)
 
-The two-audience pitch, right under the trust strip: a homeowner panel (find a tradesman) and a business panel (TradeDesk AI for your business), so a visitor sorts themselves in one glance. Each panel's photo is a local-only file — see [`public/images/README.md`](../public/images/README.md) (`audience-homeowner.jpg` / `audience-business.jpg`); the fallback tile shown here uses the same `bg-card` pattern as the hero and About photos.
+The two-audience pitch, right under the hero: a homeowner panel (find a tradesman) and a business panel (TradeDesk AI for your business), so a visitor sorts themselves in one glance. Each panel's photo is a local-only file — see [`public/images/README.md`](../public/images/README.md) (`audience-homeowner.jpg` / `audience-business.jpg`); the fallback tile shown here uses the same `bg-card` pattern as the hero and About photos. The business panel's background is a warm charcoal-brown (`#3a352f`, the same tone as the hero photo's fallback colour) rather than `.band-dark`'s default near-black, set via inline style so it doesn't depend on Tailwind's utility-vs-component cascade order.
+
+### Trust strip
+
+![Trust strip](screenshots/trust-strip.png)
+
+**File:** [`components/marketing/trust-strip.tsx`](../components/marketing/trust-strip.tsx)
+
+A row of small credibility markers, now sitting under the audience split rather than directly under the hero.
 
 ### Category grid
 

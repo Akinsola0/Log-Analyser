@@ -22,8 +22,8 @@ export default async function HomePage() {
     <>
       <main id="main" className="flex-1">
         <Hero categories={categories} locations={locations} />
-        <TrustStrip />
         <AudienceSplit />
+        <TrustStrip />
         <CategoryGrid
           categories={categories}
           defaultLocation={locations[0]?.slug ?? "naas"}
