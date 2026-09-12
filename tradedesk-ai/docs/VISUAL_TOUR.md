@@ -32,7 +32,9 @@ Full-bleed photo hero (Booksy-style): a transparent header over a darkened photo
 
 **File:** [`components/marketing/audience-split.tsx`](../components/marketing/audience-split.tsx)
 
-The two-audience pitch, right under the hero: a homeowner panel (find a tradesman) and a business panel (TradeDesk AI for your business), so a visitor sorts themselves in one glance. Each panel's photo is a local-only file — see [`public/images/README.md`](../public/images/README.md) (`audience-homeowner.jpg` / `audience-business.jpg`); the fallback tile shown here uses the same `bg-card` pattern as the hero and About photos. The business panel's background is a warm charcoal-brown (`#3a352f`, the same tone as the hero photo's fallback colour) rather than `.band-dark`'s default near-black, set via inline style so it doesn't depend on Tailwind's utility-vs-component cascade order.
+The two-audience pitch, right under the hero: a homeowner panel (find a tradesman) and a business panel (TradeDesk AI for your business), so a visitor sorts themselves in one glance. Contained in one big rounded card (Booksy-style) rather than full-bleed, sitting within the page's normal max-width like every other section. Each panel's photo is a local-only file — see [`public/images/README.md`](../public/images/README.md) (`audience-homeowner.jpg` / `audience-business.jpg`); the fallback tile on the business side is a translucent `bg-white/10` rather than the default `bg-card`, so it harmonises with whatever colour sits behind it.
+
+The business panel's background is an olive/khaki gradient (`linear-gradient(160deg, #6f6535, #3f3a20)`) rather than `.band-dark`'s default near-black, set via inline style so it doesn't depend on Tailwind's utility-vs-component cascade order. Because that gradient is much lighter than the near-black `.band-dark` is tuned for, the panel overrides its eyebrow and body text colours directly (`text-white/90` / `text-white/75`) instead of using `.kicker`'s brand-orange or the token-driven `text-muted-foreground` — both would fail contrast against this specific background.
 
 ### Trust strip
 
