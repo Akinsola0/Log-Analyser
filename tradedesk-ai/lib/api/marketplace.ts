@@ -23,7 +23,9 @@ import type {
 } from "@/lib/api/types";
 
 /** Public listings carry only the card fields — never the profile's contact details. */
-function toListing(profile: MockListing): MarketplaceListing {
+/** Exported for `lib/api/match-requests.ts`, which needs the same shape when
+ *  looking up a fallback candidate's public listing. */
+export function toListing(profile: MockListing): MarketplaceListing {
   return {
     business_id: profile.business_id,
     slug: profile.slug,

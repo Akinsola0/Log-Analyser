@@ -5,6 +5,7 @@ import type {
   LeadSource,
   LeadStatus,
   LeadUrgency,
+  MatchRequestStatus,
   MessageChannel,
   MessageStatus,
   TradeType,
@@ -70,6 +71,12 @@ export const messageStatusLabels: Record<MessageStatus, string> = {
   sent: "Sent",
   delivered: "Delivered",
   failed: "Failed",
+};
+
+export const matchRequestStatusLabels: Record<MatchRequestStatus, string> = {
+  pending: "Awaiting your response",
+  accepted: "Accepted",
+  declined: "Declined",
 };
 
 /** Monday-first, the way a working week reads. Index is the DB `weekday` value. */

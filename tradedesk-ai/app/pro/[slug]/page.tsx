@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MapPin, Phone } from "lucide-react";
 
+import { ConfirmTradesmanForm } from "@/components/marketplace/confirm-tradesman-form";
 import { ContactForm } from "@/components/marketplace/contact-form";
 import {
   PhotoTile,
@@ -22,6 +23,12 @@ import { tradeTypeLabels } from "@/lib/labels";
 
 interface ProPageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{
+    issue?: string;
+    eircode?: string;
+    dates?: string;
+    fallback?: string;
+  }>;
 }
 
 export async function generateMetadata({
@@ -37,8 +44,9 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProPage({ params }: ProPageProps) {
+export default async function ProPage({ params, searchParams }: ProPageProps) {
   const { slug } = await params;
+  const sp = await searchParams;
   const [profile, categories] = await Promise.all([
     getMarketplaceProfile(slug),
     getCategories(),
@@ -48,6 +56,18 @@ export default async function ProPage({ params }: ProPageProps) {
 
   const icon = iconForCategory(profile.categories, categories);
   const memberSince = new Date(profile.member_since).getFullYear();
+
+  // Arrived from the "find a tradesman" chat's recommendation list — swap
+  // the plain callback form for the confirm-and-send flow that posts to
+  // this business's Requests inbox instead of the general leads list.
+  const issue = sp.issue ?? "";
+  const eircode = sp.eircode ?? "";
+  const dateRange = sp.dates ?? "";
+  const fromChat = Boolean(issue || eircode || dateRange);
+  const fallbackSlugs = (sp.fallback ?? "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
 
   return (
     <>
@@ -119,7 +139,9 @@ export default async function ProPage({ params }: ProPageProps) {
 
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Button asChild size="lg">
-                    <a href="#contact">Request a callback</a>
+                    <a href="#contact">
+                      {fromChat ? "Confirm for this job" : "Request a callback"}
+                    </a>
                   </Button>
                   <Button asChild size="lg" variant="outline">
                     <a href={`tel:${profile.phone}`}>
@@ -218,20 +240,32 @@ export default async function ProPage({ params }: ProPageProps) {
           <aside id="contact" className="lg:sticky lg:top-24 lg:self-start">
             <Card className="py-5">
               <CardContent className="px-5">
-                <h2 className="display text-xl">Request a callback</h2>
+                <h2 className="display text-xl">
+                  {fromChat ? "Confirm this tradesman" : "Request a callback"}
+                </h2>
                 <p className="text-muted-foreground mt-1 text-sm">
                   {profile.responds_within_minutes !== null
                     ? `${profile.business_name} usually replies within ${profile.responds_within_minutes} minutes.`
                     : `${profile.business_name} will come back to you shortly.`}
                 </p>
                 <div className="mt-4">
-                  <Suspense
-                    fallback={
-                      <div className="bg-secondary/40 h-72 animate-pulse rounded-lg" />
-                    }
-                  >
-                    <ContactForm profile={profile} />
-                  </Suspense>
+                  {fromChat ? (
+                    <ConfirmTradesmanForm
+                      profile={profile}
+                      issue={issue}
+                      eircode={eircode}
+                      dateRange={dateRange}
+                      fallbackSlugs={fallbackSlugs}
+                    />
+                  ) : (
+                    <Suspense
+                      fallback={
+                        <div className="bg-secondary/40 h-72 animate-pulse rounded-lg" />
+                      }
+                    >
+                      <ContactForm profile={profile} />
+                    </Suspense>
+                  )}
                 </div>
               </CardContent>
             </Card>

@@ -160,7 +160,11 @@ Services, prices and reviews for one tradesman ([`getMarketplaceProfile()`](../l
 
 ![Contact form — pre-filled from chat](screenshots/pro-prefilled-contact.png)
 
-Arriving from a chat recommendation carries `?issue=&eircode=&dates=` in the URL; the contact form reads them (`useSearchParams`, wrapped in `<Suspense>` in the page since it's a client hook) and pre-fills the description, address and a new "Preferred dates" field, with a small banner explaining why — so nobody repeats themselves.
+An organic visit (not from the chat) keeps this plain callback form — arriving with `?issue=&eircode=&dates=` in the URL still pre-fills the description, address and a "Preferred dates" field (`useSearchParams`, wrapped in `<Suspense>` in the page since it's a client hook), with a small banner explaining why — so nobody repeats themselves.
+
+![Confirm this tradesman — arriving from the chat](screenshots/pro-confirm-form.png)
+
+Arriving from a chat recommendation instead swaps this panel entirely for [`components/marketplace/confirm-tradesman-form.tsx`](../components/marketplace/confirm-tradesman-form.tsx) — a "Confirm this tradesman" flow, not a callback. The page (a Server Component) reads `searchParams` itself and passes plain props down, so this component never needs its own `useSearchParams()`/`<Suspense>` pair. Submitting posts a [`MatchRequest`](../lib/api/match-requests.ts) that lands in that business's **Requests** inbox for an explicit accept/decline, rather than a general lead — see below and the `Match requests` section of [`docs/api-contract.md`](api-contract.md). The URL also carries the chat's other recommendations as `?fallback=slug,slug,…`, in order — if this tradesman declines, the request automatically moves to the next one.
 
 ---
 
@@ -175,6 +179,21 @@ Every dashboard route is gated on demo (or Supabase) auth and shares [`component
 ![Dashboard overview](screenshots/dashboard-overview.png)
 
 Week counters plus the "Needs you" queue — [`components/dashboard/attention-list.tsx`](../components/dashboard/attention-list.tsx) — surfacing failed calls, stuck confirmations and untouched leads. The amber warning cards use the `--warn-*` tokens from `app/globals.css`, not a hardcoded colour.
+
+### Requests
+
+**File:** [`app/dashboard/requests/page.tsx`](../app/dashboard/requests/page.tsx)
+
+![Dashboard requests](screenshots/dashboard-requests.png)
+
+A dedicated inbox for [`MatchRequest`](../lib/api/match-requests.ts)s — homeowners who confirmed this business from the "find a tradesman" chat's "Confirm this tradesman" flow, kept separate from the general "Needs you" list on Overview. The sidebar nav ([`components/dashboard/dashboard-nav.ts`](../components/dashboard/dashboard-nav.ts)) shows a pending-count badge next to "Requests", loaded in [`components/dashboard/dashboard-shell.tsx`](../components/dashboard/dashboard-shell.tsx) so it's visible before the owner ever opens the page.
+
+Each pending request has **Accept** and **Decline** buttons:
+
+- **Accept** books the job — a real `leads` row (shows up on [Leads](#leads)) and a real outbound confirmation `messages` row (shows up on [Confirmations](#confirmations)), with a link straight to each. This simulates the "your request has been accepted" WhatsApp/SMS text a homeowner would get.
+- **Decline** pops the next business off the chat's fallback list and resolves the request to them immediately, rendering a "Passed to X instead" preview with a real link to their profile — Seán Doyle's card above shows this. In a real system this cascade would be async (the fallback business gets its own pending request and might decline too); it resolves instantly here because this demo only ever has one signed-in business to actually respond as.
+
+Neither branch sends a real WhatsApp/SMS message — there's no Twilio/WhatsApp Business API wired into this frontend-only project. See the `Match requests` section of [`docs/api-contract.md`](api-contract.md) for exactly what's simulated and what a backend integration would need to change.
 
 ### Leads
 

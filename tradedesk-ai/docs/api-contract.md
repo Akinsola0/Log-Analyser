@@ -36,6 +36,7 @@ These must match the database exactly — the badge components are keyed on them
 | `messages.direction`    | `inbound` \| `outbound`                                                                                                                                         |
 | `messages.status`       | `queued` \| `sent` \| `delivered` \| `failed` — **needs confirming against Twilio's statuses**                                                                  |
 | `businesses.trade_type` | `plumber`, `electrician`, `handyman`, `carpenter`, `painter`, `roofer`, `tiler`, `plasterer`, `landscaper`, `locksmith`, `heating_engineer`, `appliance_repair` |
+| `match_requests.status` | `pending` \| `accepted` \| `declined` — **not yet agreed, see open questions**                                                                                  |
 
 ---
 
@@ -383,6 +384,78 @@ CreateMarketplaceLeadResult = { lead_id: UUID; expected_response_minutes: number
 
 Public and unauthenticated: rate-limit it, and verify the phone number before the lead reaches a tradesman's dashboard.
 
+### Match requests
+
+The "confirm this tradesman" flow: a homeowner who arrived on `/pro/[slug]`
+from the "find a tradesman" chat (`recommendTradespeople`, above) can send
+that specific business a request instead of the general callback form. It
+lands in a dedicated **Requests** inbox (`/dashboard/requests`) for an
+explicit accept/decline, separate from the "Needs you" list every other
+lead source feeds.
+
+#### `getMatchRequests(): Promise<MatchRequest[]>`
+
+Proposed route: **`GET /api/match-requests`**
+
+Newest first, scoped to the signed-in business (RLS, same as everything
+else in the dashboard).
+
+#### `createMatchRequest(input: CreateMatchRequestInput): Promise<MatchRequest>`
+
+Proposed route: **`POST /api/match-requests`**
+
+```ts
+CreateMatchRequestInput = {
+  business_id, customer_name, customer_phone,
+  customer_email?, customer_address?,
+  service, description, preferred_date_range?,
+  preferred_channel,          // "sms" | "whatsapp"
+  fallback_slugs: string[],   // the chat's other recommendations, in order
+}
+```
+
+Public and unauthenticated, same as `createMarketplaceLead`: rate-limit it.
+
+#### `respondToMatchRequest(input: RespondToMatchRequestInput): Promise<RespondToMatchRequestResult>`
+
+Proposed route: **`POST /api/match-requests/[id]/respond`**
+
+```ts
+RespondToMatchRequestInput = { request_id: UUID; response: "accepted" | "declined" }
+RespondToMatchRequestResult = { request: MatchRequest; fallback?: MarketplaceListing }
+```
+
+**Accept** books the job: creates a real `leads` row (`source =
+"marketplace"`, `status = "booked"`) and a real outbound `messages` row,
+the same "you're booked in" confirmation `createMarketplaceLead`'s jobs
+send — so it shows up on `/dashboard/leads` and `/dashboard/messages` like
+any other booking.
+
+**Decline** pops the next slug off `fallback_slugs` and resolves the
+enquiry to that business immediately, returning their listing as
+`fallback` so the UI can show "passed to X instead" with a link to their
+profile.
+
+> **What's simulated here, and why:** there's no real WhatsApp/SMS
+> delivery anywhere in this project yet (see `messages` in Open questions
+> below) — accepting a request never actually notifies the homeowner, it
+> only writes the `messages` row a real integration would send from. The
+> decline cascade is simulated instant, too: in a real system the fallback
+> business would get their own pending request in their own dashboard and
+> might decline as well, but this mock only has one signed-in business to
+> ever respond as, so `respondToMatchRequest` resolves the fallback
+> synchronously instead of creating a second pending request nothing could
+> ever act on. Both of these move server-side for real: the cascade needs
+> to become an actual queue (try the next business, wait for their
+> response or a timeout, repeat), and accept/decline both need to trigger
+> real outbound messages once a Twilio/WhatsApp Business API integration
+> exists.
+
+> **Needed from you:** confirm `match_requests` as its own table (it isn't
+> a `leads` row until accepted — a declined request was never a booking)
+> and whether the fallback cascade should be a synchronous chain of writes
+> like here, or an async job queue with its own timeout-and-retry policy.
+
 ---
 
 ## Open questions for the backend pair
@@ -397,23 +470,25 @@ Public and unauthenticated: rate-limit it, and verify the phone number before th
 8. **Session refresh.** Sign-out is wired (`signOut()`); tell us whether you want the client to refresh the Supabase session itself or go through a route.
 9. **`leads.preferred_date_range`.** Not in the shared schema. Needed so a homeowner's date preference from the "find a tradesman" chat survives into the lead a tradesman sees.
 10. **Real matching/AI service for `recommendTradespeople`.** Currently a client-side keyword + reputation heuristic over mock data — confirm the route shape in that section above once there's a real service behind it.
+11. **`match_requests` table and fallback cascade.** New for the "confirm this tradesman" flow (see Match requests above) — confirm the table shape and whether the decline-to-next-business cascade should be synchronous or an async queue.
 
 ## Which screen calls what
 
-| Screen                        | Functions it calls                                                                        |
-| ----------------------------- | ----------------------------------------------------------------------------------------- |
-| `/` (homepage)                | `getCategories`, `getLocations`, `getFeaturedReviews`                                     |
-| `/find`                       | `getCategories`, `getLocations`                                                           |
-| `/find/[category]/[location]` | `getCategories`, `getLocations`, `getLocation`, `searchListings`, `recommendTradespeople` |
-| `/pro/[slug]`                 | `getMarketplaceProfile`, `getCategories`, `createMarketplaceLead`                         |
-| Dashboard shell               | `getSession`                                                                              |
-| `/dashboard`                  | `getDashboardSummary`, `getAttentionItems`, `getJobs`, `getCalls`                         |
-| `/dashboard/leads`            | `getLeads`, `updateLeadStatus`                                                            |
-| `/dashboard/calendar`         | `getSession`, `getJobs`, `getAvailability`, `updateJob`                                   |
-| `/dashboard/calls`            | `getCalls`, `reclassifyCall`                                                              |
-| `/dashboard/messages`         | `getMessages`, `retryMessage`                                                             |
-| `/dashboard/availability`     | `getSession`, `getAvailability`, `saveAvailability`                                       |
-| `/dashboard/settings`         | `getBusiness`, `updateBusiness`                                                           |
+| Screen                        | Functions it calls                                                                                                      |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `/` (homepage)                | `getCategories`, `getLocations`, `getFeaturedReviews`                                                                   |
+| `/find`                       | `getCategories`, `getLocations`                                                                                         |
+| `/find/[category]/[location]` | `getCategories`, `getLocations`, `getLocation`, `searchListings`, `recommendTradespeople`                               |
+| `/pro/[slug]`                 | `getMarketplaceProfile`, `getCategories`, `createMarketplaceLead` or `createMatchRequest` (when arriving from the chat) |
+| Dashboard shell               | `getSession`, `getMatchRequests` (for the nav badge)                                                                    |
+| `/dashboard`                  | `getDashboardSummary`, `getAttentionItems`, `getJobs`, `getCalls`                                                       |
+| `/dashboard/requests`         | `getMatchRequests`, `respondToMatchRequest`, `getMarketplaceProfile` (for a declined request's fallback preview)        |
+| `/dashboard/leads`            | `getLeads`, `updateLeadStatus`                                                                                          |
+| `/dashboard/calendar`         | `getSession`, `getJobs`, `getAvailability`, `updateJob`                                                                 |
+| `/dashboard/calls`            | `getCalls`, `reclassifyCall`                                                                                            |
+| `/dashboard/messages`         | `getMessages`, `retryMessage`                                                                                           |
+| `/dashboard/availability`     | `getSession`, `getAvailability`, `saveAvailability`                                                                     |
+| `/dashboard/settings`         | `getBusiness`, `updateBusiness`                                                                                         |
 
 The marketing and marketplace pages are React Server Components (so they're
 indexable); the dashboard screens are client components, because they mutate.

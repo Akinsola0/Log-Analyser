@@ -34,3 +34,8 @@ export {
   getFeaturedReviews,
   createMarketplaceLead,
 } from "@/lib/api/marketplace";
+export {
+  getMatchRequests,
+  createMatchRequest,
+  respondToMatchRequest,
+} from "@/lib/api/match-requests";

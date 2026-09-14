@@ -13,6 +13,7 @@ import {
   mockCustomers,
   mockJobs,
   mockLeads,
+  mockMatchRequests,
   mockMessages,
   mockProfile,
 } from "@/lib/api/mock/seed";
@@ -23,6 +24,7 @@ import type {
   Customer,
   Job,
   Lead,
+  MatchRequest,
   Message,
   Profile,
 } from "@/lib/api/types";
@@ -43,6 +45,7 @@ export const db = {
   calls: clone<Call[]>(mockCalls),
   messages: clone<Message[]>(mockMessages),
   availability: clone<AvailabilityRule[]>(mockAvailability),
+  matchRequests: clone<MatchRequest[]>(mockMatchRequests),
 };
 
 /** Simulated network latency, so loading states are real rather than theoretical. */

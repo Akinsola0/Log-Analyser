@@ -220,7 +220,26 @@ export function FindTradesmanChat({
     else if (step === "eircode") submitEircode();
   }
 
-  const prefillSuffix = `?issue=${encodeURIComponent(issue)}&eircode=${encodeURIComponent(eircode)}&dates=${encodeURIComponent(dateLabel)}`;
+  /**
+   * Every result's link carries the chat's answers, plus the *other*
+   * recommended businesses (this one excluded, order preserved) as
+   * `fallback` — so if the homeowner confirms this one and it gets
+   * declined, `respondToMatchRequest` knows who to offer the job to next.
+   */
+  function buildPrefillSuffix(currentSlug: string): string {
+    const fallbackSlugs = (results ?? [])
+      .map((listing) => listing.slug)
+      .filter((slug) => slug !== currentSlug);
+    const params = new URLSearchParams({
+      issue,
+      eircode,
+      dates: dateLabel,
+    });
+    if (fallbackSlugs.length > 0) {
+      params.set("fallback", fallbackSlugs.join(","));
+    }
+    return `?${params.toString()}`;
+  }
 
   return (
     <Card className="mb-6 gap-0 overflow-hidden py-0">
@@ -284,7 +303,7 @@ export function FindTradesmanChat({
                       <ListingCard
                         listing={listing}
                         icon={iconForCategory(listing.categories, categories)}
-                        hrefSuffix={prefillSuffix}
+                        hrefSuffix={buildPrefillSuffix(listing.slug)}
                       />
                     </li>
                   ))}

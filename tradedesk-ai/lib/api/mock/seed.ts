@@ -15,6 +15,7 @@ import type {
   Customer,
   Job,
   Lead,
+  MatchRequest,
   Message,
   Profile,
 } from "@/lib/api/types";
@@ -522,6 +523,50 @@ export const mockAvailability: AvailabilityRule[] = [
     weekday: 6,
     start_time: "09:00",
     end_time: "13:00",
+  },
+];
+
+/**
+ * Two homeowners who went through the "find a tradesman" chat and confirmed
+ * Kelly Plumbing & Heating — one still pending, one already actioned, so the
+ * Requests inbox has something to show on first load.
+ */
+export const mockMatchRequests: MatchRequest[] = [
+  {
+    id: "mr-0001",
+    business_id: BUSINESS_ID,
+    customer_name: "Roisín Kavanagh",
+    customer_phone: "+353871234599",
+    customer_email: "roisin.kavanagh@example.ie",
+    customer_address: "W91 F2C4",
+    service: "Emergency call-out",
+    description:
+      "Kitchen tap won't shut off fully, dripping constantly and the washer's worn through.",
+    preferred_date_range: "Tomorrow, morning",
+    preferred_channel: "whatsapp",
+    status: "pending",
+    created_at: hoursAgo(2),
+    fallback_slugs: [
+      "sheridan-plumbing-naas",
+      "nolan-plumbing-heating-naas",
+      "flowfix-plumbing-naas",
+      "reilly-and-sons-plumbing-naas",
+    ],
+  },
+  {
+    id: "mr-0002",
+    business_id: BUSINESS_ID,
+    customer_name: "Cathal Ryan",
+    customer_phone: "+353861234598",
+    customer_address: "Two-Mile-House, Co. Kildare",
+    service: "Boiler service",
+    description:
+      "Annual boiler service, landlord needs the cert before a new tenant moves in.",
+    preferred_date_range: "This week, afternoon",
+    preferred_channel: "sms",
+    status: "accepted",
+    created_at: hoursAgo(30),
+    fallback_slugs: ["sheridan-plumbing-naas", "nolan-plumbing-heating-naas"],
   },
 ];
 

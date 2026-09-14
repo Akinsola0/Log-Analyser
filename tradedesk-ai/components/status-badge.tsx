@@ -22,6 +22,7 @@ import type {
   LeadSource,
   LeadStatus,
   LeadUrgency,
+  MatchRequestStatus,
   MessageStatus,
 } from "@/lib/api/types";
 import {
@@ -30,6 +31,7 @@ import {
   leadSourceLabels,
   leadStatusLabels,
   leadUrgencyLabels,
+  matchRequestStatusLabels,
   messageStatusLabels,
 } from "@/lib/labels";
 
@@ -149,6 +151,28 @@ export function MessageStatusBadge({ status }: { status: MessageStatus }) {
       {status === "failed" ? <PhoneOff aria-hidden /> : null}
       {status === "queued" ? <MessageSquare aria-hidden /> : null}
       {messageStatusLabels[status]}
+    </Badge>
+  );
+}
+
+const matchRequestStatusStyles: Record<MatchRequestStatus, string> = {
+  pending:
+    "border-[var(--warn-border)] bg-[var(--warn-bg)] text-[var(--warn-fg)]",
+  accepted: "border-ink/25 bg-hivis text-ink",
+  declined: "border-border bg-secondary text-muted-foreground",
+};
+
+export function MatchRequestStatusBadge({
+  status,
+}: {
+  status: MatchRequestStatus;
+}) {
+  return (
+    <Badge
+      variant="outline"
+      className={cn(base, matchRequestStatusStyles[status])}
+    >
+      {matchRequestStatusLabels[status]}
     </Badge>
   );
 }

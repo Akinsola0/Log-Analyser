@@ -453,6 +453,79 @@ export interface RecommendTradespeopleInput {
   date_range?: string;
 }
 
+/** `match_requests.status`. */
+export const MATCH_REQUEST_STATUSES = [
+  "pending",
+  "accepted",
+  "declined",
+] as const;
+export type MatchRequestStatus = (typeof MATCH_REQUEST_STATUSES)[number];
+
+/**
+ * A homeowner's confirmed pick from the "find a tradesman" chat, sitting in
+ * the tradesman's Requests inbox awaiting accept/decline — distinct from a
+ * plain `CreateMarketplaceLeadInput` lead because it carries the ordered
+ * list of other recommended businesses, so a decline can automatically move
+ * to the next one.
+ *
+ * TODO(backend): not a real table yet — `match_requests`, one row per
+ * business per homeowner enquiry. See docs/api-contract.md for the
+ * accept/decline/fallback flow this backs, including which parts
+ * (WhatsApp/SMS delivery, a second business actually receiving the
+ * fallback offer) are simulated in this frontend-only build.
+ */
+export interface MatchRequest {
+  id: UUID;
+  business_id: UUID;
+  customer_name: string;
+  customer_phone: string;
+  customer_email?: string;
+  /** Eircode or townland, as given to the chat. */
+  customer_address?: string;
+  service: string;
+  description: string;
+  preferred_date_range?: string;
+  preferred_channel: MessageChannel;
+  status: MatchRequestStatus;
+  created_at: ISODateTime;
+  /**
+   * Other recommended businesses for this same enquiry, best-fit order,
+   * this one excluded — `respondToMatchRequest` pops the first slug here
+   * when declined.
+   */
+  fallback_slugs: string[];
+  /** Set once a decline has moved this enquiry on to a fallback business. */
+  resolved_via_slug?: string;
+}
+
+export interface CreateMatchRequestInput {
+  business_id: UUID;
+  customer_name: string;
+  customer_phone: string;
+  customer_email?: string;
+  customer_address?: string;
+  service: string;
+  description: string;
+  preferred_date_range?: string;
+  preferred_channel: MessageChannel;
+  fallback_slugs: string[];
+}
+
+export interface RespondToMatchRequestInput {
+  request_id: UUID;
+  response: "accepted" | "declined";
+}
+
+export interface RespondToMatchRequestResult {
+  request: MatchRequest;
+  /**
+   * Set when declined and a fallback business existed to offer the job to —
+   * the UI uses this to show "offered to X instead" and a link to their
+   * profile, simulating the WhatsApp message a homeowner would receive.
+   */
+  fallback?: MarketplaceListing;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Auth                                                                        */
 /* -------------------------------------------------------------------------- */

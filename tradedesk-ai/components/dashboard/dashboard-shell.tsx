@@ -26,12 +26,18 @@ import {
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAsync } from "@/hooks/use-async";
-import { getSession, signOut } from "@/lib/api";
+import { getMatchRequests, getSession, signOut } from "@/lib/api";
 import { formatPhone } from "@/lib/format";
 import { tradeTypeLabels } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 
-function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
+function NavLinks({
+  pendingRequestCount,
+  onNavigate,
+}: {
+  pendingRequestCount: number;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
 
   return (
@@ -41,6 +47,8 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
           item.href === "/dashboard"
             ? pathname === "/dashboard"
             : pathname.startsWith(item.href);
+        const badgeCount =
+          item.href === "/dashboard/requests" ? pendingRequestCount : 0;
 
         return (
           <Link
@@ -57,6 +65,18 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
           >
             <item.icon className="size-4" aria-hidden />
             {item.label}
+            {badgeCount > 0 ? (
+              <span
+                className={cn(
+                  "ml-auto flex size-5 items-center justify-center rounded-full text-xs font-semibold",
+                  active
+                    ? "bg-primary-foreground/20 text-primary-foreground"
+                    : "bg-destructive text-white",
+                )}
+              >
+                {badgeCount}
+              </span>
+            ) : null}
           </Link>
         );
       })}
@@ -76,6 +96,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     loading,
     error,
   } = useAsync(useCallback(() => getSession(), []));
+  // Loaded here (not just on the requests page) so the nav badge shows
+  // pending requests before the owner ever opens the inbox.
+  const { data: matchRequests } = useAsync(
+    useCallback(() => getMatchRequests(), []),
+  );
+  const pendingRequestCount =
+    matchRequests?.filter((request) => request.status === "pending").length ??
+    0;
 
   // `getSession()` throws when nobody is signed in — that is the gate.
   const signedOut = !loading && !session;
@@ -112,7 +140,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <Logo />
         </div>
         <div className="flex-1 p-4">
-          <NavLinks />
+          <NavLinks pendingRequestCount={pendingRequestCount} />
         </div>
         <div className="text-muted-foreground border-t p-5 text-xs">
           {loading ? (
@@ -145,7 +173,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   </SheetTitle>
                 </SheetHeader>
                 <div className="px-3">
-                  <NavLinks onNavigate={() => setMenuOpen(false)} />
+                  <NavLinks
+                    pendingRequestCount={pendingRequestCount}
+                    onNavigate={() => setMenuOpen(false)}
+                  />
                 </div>
               </SheetContent>
             </Sheet>
