@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Loader2, MessageCircle, Smartphone } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import {
+  CheckCircle2,
+  Loader2,
+  MessageCircle,
+  Smartphone,
+  Sparkles,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,21 +36,36 @@ import { cn } from "@/lib/utils";
 const channelIcons = { whatsapp: MessageCircle, sms: Smartphone };
 
 /**
+ * Everything the "find a tradesman" chat carries over via the query string
+ * (see `components/marketplace/find-tradesman-chat.tsx`) — read once, used
+ * to pre-fill the form below so a homeowner never repeats themselves.
+ */
+function useChatPrefill() {
+  const params = useSearchParams();
+  const issue = params.get("issue") ?? "";
+  const eircode = params.get("eircode") ?? "";
+  const dates = params.get("dates") ?? "";
+  return { issue, eircode, dates, present: Boolean(issue || eircode || dates) };
+}
+
+/**
  * The homeowner's request. Posts through `createMarketplaceLead()`, which
  * creates a lead with `source = "marketplace"` — so it lands in that
  * tradesman's dashboard next to the calls the AI answered.
  */
 export function ContactForm({ profile }: { profile: MarketplaceProfile }) {
+  const prefill = useChatPrefill();
   const [form, setForm] = useState<CreateMarketplaceLeadInput>({
     business_id: profile.business_id,
     customer_name: "",
     customer_phone: "",
     customer_email: "",
-    customer_address: "",
+    customer_address: prefill.eircode,
     service: profile.services[0]?.name ?? "",
-    description: "",
-    urgency: "routine",
+    description: prefill.issue,
+    urgency: /as soon as possible/i.test(prefill.dates) ? "urgent" : "routine",
     preferred_channel: "whatsapp",
+    preferred_date_range: prefill.dates || undefined,
   });
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,6 +118,19 @@ export function ContactForm({ profile }: { profile: MarketplaceProfile }) {
 
   return (
     <form onSubmit={submit} className="space-y-4">
+      {prefill.present ? (
+        <div className="bg-secondary/60 border-border flex items-start gap-2.5 rounded-lg border p-3 text-sm">
+          <Sparkles
+            className="text-primary mt-0.5 size-4 shrink-0"
+            aria-hidden
+          />
+          <p className="text-muted-foreground">
+            Filled in from what you told the chat — check it over and add your
+            contact details below.
+          </p>
+        </div>
+      ) : null}
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-1.5">
           <Label htmlFor="contact-name">Your name</Label>
@@ -190,6 +225,21 @@ export function ContactForm({ profile }: { profile: MarketplaceProfile }) {
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="grid gap-1.5">
+          <Label htmlFor="contact-dates">
+            Preferred dates{" "}
+            <span className="text-muted-foreground">(optional)</span>
+          </Label>
+          <Input
+            id="contact-dates"
+            placeholder="e.g. This week, any afternoon"
+            value={form.preferred_date_range ?? ""}
+            onChange={(event) =>
+              setForm({ ...form, preferred_date_range: event.target.value })
+            }
+          />
         </div>
       </div>
 

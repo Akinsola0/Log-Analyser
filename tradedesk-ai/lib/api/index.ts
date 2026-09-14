@@ -29,6 +29,7 @@ export {
   getLocations,
   getLocation,
   searchListings,
+  recommendTradespeople,
   getMarketplaceProfile,
   getFeaturedReviews,
   createMarketplaceLead,

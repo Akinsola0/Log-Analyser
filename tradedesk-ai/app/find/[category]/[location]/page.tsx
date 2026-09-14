@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { FindTradesmanChat } from "@/components/marketplace/find-tradesman-chat";
 import { SearchResults } from "@/components/marketplace/search-results";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
@@ -96,6 +97,13 @@ export default async function FindPage({ params }: FindPageProps) {
         </div>
 
         <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
+          <FindTradesmanChat
+            category={category}
+            location={town.slug}
+            town={town.town}
+            categories={categories}
+          />
+
           <SearchResults
             category={category}
             location={town.slug}

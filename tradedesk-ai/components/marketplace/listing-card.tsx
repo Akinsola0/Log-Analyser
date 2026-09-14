@@ -12,10 +12,17 @@ import type { MarketplaceListing } from "@/lib/api";
 export function ListingCard({
   listing,
   icon,
+  hrefSuffix = "",
 }: {
   listing: MarketplaceListing;
   /** lucide icon name for the listing's first category. */
   icon: string;
+  /**
+   * Appended to every link to `/pro/[slug]` — used by the "find a
+   * tradesman" chat to carry its answers through as a query string, so the
+   * contact form on the other end can pre-fill itself.
+   */
+  hrefSuffix?: string;
 }) {
   return (
     <Card className="py-5">
@@ -32,7 +39,7 @@ export function ListingCard({
             <div className="min-w-0">
               <h3 className="display text-2xl">
                 <Link
-                  href={`/pro/${listing.slug}`}
+                  href={`/pro/${listing.slug}${hrefSuffix}`}
                   className="rounded underline-offset-4 hover:underline"
                 >
                   {listing.business_name}
@@ -86,10 +93,12 @@ export function ListingCard({
 
           <div className="mt-4 flex flex-wrap gap-2">
             <Button asChild size="sm">
-              <Link href={`/pro/${listing.slug}`}>See profile and prices</Link>
+              <Link href={`/pro/${listing.slug}${hrefSuffix}`}>
+                See profile and prices
+              </Link>
             </Button>
             <Button asChild size="sm" variant="outline">
-              <Link href={`/pro/${listing.slug}#contact`}>
+              <Link href={`/pro/${listing.slug}${hrefSuffix}#contact`}>
                 Request a callback
               </Link>
             </Button>

@@ -315,6 +315,34 @@ MarketplaceListing = {
 
 > **Needed from you:** a `slug` column on `tradesman_profiles` (unique), and a service-area → town join so a listing can appear under several towns.
 
+### `recommendTradespeople(input: RecommendTradespeopleInput): Promise<MarketplaceListing[]>`
+
+Proposed route: **`POST /api/marketplace/recommend`**
+
+Backs the "find a tradesman" chat on `/find/[category]/[location]` — a guided,
+scripted conversation (not a live model call; there's no AI service wired up
+yet) that asks a homeowner what's wrong, their Eircode, and a preferred date
+range, then returns up to 5 `MarketplaceListing`s, best match first.
+
+```ts
+RecommendTradespeopleInput = {
+  category (TradeType), location,        // same meaning as SearchListingsInput
+  issue_description: string,             // free text from the chat
+  eircode?: string,
+  date_range?: string                    // a quick-reply label, e.g. "As soon as possible"
+}
+```
+
+The mock implementation is a keyword-overlap + reputation heuristic over the
+same listings `searchListings` would return for that category/location — it
+is explicitly **not** real language understanding. The function is written so
+a real matching service (rules-based or model-backed) can replace the body
+without any component changing, same as every other function here.
+
+> **Needed from you:** if and when there's a real matching/AI service behind
+> this, confirm the route shape above and whether ranking should move
+> server-side entirely or stay a client-callable scoring pass.
+
 ### `getMarketplaceProfile(slug: string): Promise<MarketplaceProfile | null>`
 
 Proposed route: **`GET /api/marketplace/pro/[slug]`**
@@ -339,10 +367,17 @@ The homeowner contact/booking form. Creates a `customers` row when the phone num
 CreateMarketplaceLeadInput = {
   business_id, customer_name, customer_phone,
   customer_email?, customer_address?,
-  service, description, urgency, preferred_channel  // "sms" | "whatsapp"
+  service, description, urgency, preferred_channel,  // "sms" | "whatsapp"
+  preferred_date_range?   // not in the shared schema yet, see below
 }
 CreateMarketplaceLeadResult = { lead_id: UUID; expected_response_minutes: number }
 ```
+
+> **Needed from you:** `preferred_date_range` isn't a column on `leads` yet.
+> It's populated when a homeowner arrives from the "find a tradesman" chat
+> with a date range already picked (see `recommendTradespeople` above) —
+> shown to the tradesman as context, not currently a bookable field anywhere
+> else in the product.
 
 `expected_response_minutes` is what the confirmation screen promises the homeowner, so it should reflect that business's real responsiveness, not a constant.
 
@@ -360,23 +395,25 @@ Public and unauthenticated: rate-limit it, and verify the phone number before th
 6. **Booked value.** `booked_value_cents_this_week` is currently jobs × a flat €185 estimate. If jobs get a real value column, we'll render that instead and drop the estimate.
 7. **Photo storage.** `photo_urls[]` is empty in mock data and listings render an initials tile. Tell us the Supabase Storage bucket/URL pattern and we'll add it to `next.config.ts` `images.remotePatterns`.
 8. **Session refresh.** Sign-out is wired (`signOut()`); tell us whether you want the client to refresh the Supabase session itself or go through a route.
+9. **`leads.preferred_date_range`.** Not in the shared schema. Needed so a homeowner's date preference from the "find a tradesman" chat survives into the lead a tradesman sees.
+10. **Real matching/AI service for `recommendTradespeople`.** Currently a client-side keyword + reputation heuristic over mock data — confirm the route shape in that section above once there's a real service behind it.
 
 ## Which screen calls what
 
-| Screen                        | Functions it calls                                                |
-| ----------------------------- | ----------------------------------------------------------------- |
-| `/` (homepage)                | `getCategories`, `getLocations`, `getFeaturedReviews`             |
-| `/find`                       | `getCategories`, `getLocations`                                   |
-| `/find/[category]/[location]` | `getCategories`, `getLocations`, `getLocation`, `searchListings`  |
-| `/pro/[slug]`                 | `getMarketplaceProfile`, `getCategories`, `createMarketplaceLead` |
-| Dashboard shell               | `getSession`                                                      |
-| `/dashboard`                  | `getDashboardSummary`, `getAttentionItems`, `getJobs`, `getCalls` |
-| `/dashboard/leads`            | `getLeads`, `updateLeadStatus`                                    |
-| `/dashboard/calendar`         | `getSession`, `getJobs`, `getAvailability`, `updateJob`           |
-| `/dashboard/calls`            | `getCalls`, `reclassifyCall`                                      |
-| `/dashboard/messages`         | `getMessages`, `retryMessage`                                     |
-| `/dashboard/availability`     | `getSession`, `getAvailability`, `saveAvailability`               |
-| `/dashboard/settings`         | `getBusiness`, `updateBusiness`                                   |
+| Screen                        | Functions it calls                                                                        |
+| ----------------------------- | ----------------------------------------------------------------------------------------- |
+| `/` (homepage)                | `getCategories`, `getLocations`, `getFeaturedReviews`                                     |
+| `/find`                       | `getCategories`, `getLocations`                                                           |
+| `/find/[category]/[location]` | `getCategories`, `getLocations`, `getLocation`, `searchListings`, `recommendTradespeople` |
+| `/pro/[slug]`                 | `getMarketplaceProfile`, `getCategories`, `createMarketplaceLead`                         |
+| Dashboard shell               | `getSession`                                                                              |
+| `/dashboard`                  | `getDashboardSummary`, `getAttentionItems`, `getJobs`, `getCalls`                         |
+| `/dashboard/leads`            | `getLeads`, `updateLeadStatus`                                                            |
+| `/dashboard/calendar`         | `getSession`, `getJobs`, `getAvailability`, `updateJob`                                   |
+| `/dashboard/calls`            | `getCalls`, `reclassifyCall`                                                              |
+| `/dashboard/messages`         | `getMessages`, `retryMessage`                                                             |
+| `/dashboard/availability`     | `getSession`, `getAvailability`, `saveAvailability`                                       |
+| `/dashboard/settings`         | `getBusiness`, `updateBusiness`                                                           |
 
 The marketing and marketplace pages are React Server Components (so they're
 indexable); the dashboard screens are client components, because they mutate.

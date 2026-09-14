@@ -18,6 +18,7 @@ import type {
   MarketplaceLocation,
   MarketplaceProfile,
   MarketplaceReview,
+  RecommendTradespeopleInput,
   SearchListingsInput,
 } from "@/lib/api/types";
 
@@ -124,6 +125,97 @@ export async function searchListings(
   });
 
   return delay(sorted);
+}
+
+const STOPWORDS = new Set([
+  "the",
+  "a",
+  "an",
+  "and",
+  "or",
+  "is",
+  "are",
+  "my",
+  "it",
+  "to",
+  "in",
+  "on",
+  "at",
+  "of",
+  "for",
+  "i",
+  "we",
+  "need",
+  "have",
+  "has",
+  "got",
+  "with",
+]);
+
+function words(text: string): string[] {
+  return text
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((word) => word.length > 2 && !STOPWORDS.has(word));
+}
+
+/**
+ * The "find a tradesman" chat's matching step: scores every listing that
+ * already matches the category/location (same base set `searchListings`
+ * would return) against the homeowner's free-text description, then returns
+ * the top 5.
+ *
+ * This is a plain keyword-overlap + reputation heuristic, not real language
+ * understanding — there's no model call here, only mock data. It's written
+ * so the whole function can be replaced with a real ranking endpoint (or an
+ * LLM-backed one) without any component changing, per the contract-first
+ * rule for this file.
+ *
+ * TODO(backend): once there's a real matching/AI service, this becomes
+ * `POST /api/marketplace/recommend` and the scoring below moves server-side.
+ */
+export async function recommendTradespeople(
+  input: RecommendTradespeopleInput,
+): Promise<MarketplaceListing[]> {
+  const issueWords = words(input.issue_description);
+  const urgent = /\b(asap|as soon as possible|emergency|today|now)\b/i.test(
+    input.date_range ?? "",
+  );
+
+  const scored = mockListings
+    .filter((listing) => listing.categories.includes(input.category))
+    .filter((listing) => listing.location_slugs.includes(input.location))
+    .map((listing) => {
+      const haystack = words(
+        [
+          listing.headline,
+          ...listing.services.map((s) => `${s.name} ${s.description}`),
+        ].join(" "),
+      );
+      const overlap = issueWords.filter((word) =>
+        haystack.includes(word),
+      ).length;
+
+      let score = overlap * 3;
+      score += (listing.rating ?? 0) * 2;
+      score += Math.min(1, listing.review_count / 100);
+      if (listing.verified) score += 1;
+      if (urgent && listing.answers_24_7) score += 3;
+      if (
+        urgent &&
+        listing.responds_within_minutes !== null &&
+        listing.responds_within_minutes <= 15
+      ) {
+        score += 1;
+      }
+
+      return { listing, score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+    .map(({ listing }) => toListing(listing));
+
+  return delay(scored, 900);
 }
 
 /**

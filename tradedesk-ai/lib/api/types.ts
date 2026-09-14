@@ -410,6 +410,13 @@ export interface CreateMarketplaceLeadInput {
   description: string;
   urgency: LeadUrgency;
   preferred_channel: MessageChannel;
+  /**
+   * TODO(backend): not in the shared `leads` schema yet. Populated when a
+   * homeowner arrives from the "find a tradesman" chat with a preferred
+   * date range already picked — shown to the tradesman as context, not
+   * currently a bookable field anywhere else in the product.
+   */
+  preferred_date_range?: string;
 }
 
 export interface CreateMarketplaceLeadResult {
@@ -428,6 +435,22 @@ export interface SearchListingsInput {
   max_from_price_cents?: number;
   answers_24_7?: boolean;
   sort?: "recommended" | "rating" | "price";
+}
+
+/**
+ * The "find a tradesman" chat's answers, once a homeowner has described the
+ * job. Scored against the same listings `searchListings` would return for
+ * this category/location — see `recommendTradespeople`.
+ */
+export interface RecommendTradespeopleInput {
+  category: TradeType;
+  /** `MarketplaceLocation.slug`. */
+  location: string;
+  /** Free text — what the homeowner typed when asked what's wrong. */
+  issue_description: string;
+  eircode?: string;
+  /** A quick-reply label, e.g. "As soon as possible", "This week". */
+  date_range?: string;
 }
 
 /* -------------------------------------------------------------------------- */

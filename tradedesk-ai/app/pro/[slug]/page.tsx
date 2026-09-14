@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -224,7 +225,13 @@ export default async function ProPage({ params }: ProPageProps) {
                     : `${profile.business_name} will come back to you shortly.`}
                 </p>
                 <div className="mt-4">
-                  <ContactForm profile={profile} />
+                  <Suspense
+                    fallback={
+                      <div className="bg-secondary/40 h-72 animate-pulse rounded-lg" />
+                    }
+                  >
+                    <ContactForm profile={profile} />
+                  </Suspense>
                 </div>
               </CardContent>
             </Card>

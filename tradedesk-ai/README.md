@@ -54,8 +54,8 @@ Every row links to its screenshot(s) and source file in the [visual tour](docs/V
 | [`/dashboard/messages`](docs/VISUAL_TOUR.md#confirmations)                | Booking confirmations, including failures and a re-send on the other channel                                                                                                                |
 | [`/dashboard/availability`](docs/VISUAL_TOUR.md#working-hours)            | Weekly working-hours editor, split days supported                                                                                                                                           |
 | [`/dashboard/settings`](docs/VISUAL_TOUR.md#business-profile)             | Business profile and confirmation-channel preferences                                                                                                                                       |
-| [`/find`, `/find/[category]/[location]`](docs/VISUAL_TOUR.md#marketplace) | Marketplace browse and search                                                                                                                                                               |
-| [`/pro/[slug]`](docs/VISUAL_TOUR.md#public-tradesman-profile)             | Public tradesman profile with services, prices and reviews                                                                                                                                  |
+| [`/find`, `/find/[category]/[location]`](docs/VISUAL_TOUR.md#marketplace) | Marketplace browse and search, plus a guided "find a tradesman" chat that recommends the best 5 matches                                                                                     |
+| [`/pro/[slug]`](docs/VISUAL_TOUR.md#public-tradesman-profile)             | Public tradesman profile with services, prices and reviews — pre-fills the contact form when arriving from the chat                                                                         |
 
 ## How the data layer works
 

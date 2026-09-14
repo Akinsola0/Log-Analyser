@@ -140,6 +140,22 @@ Reuses `CategoryGrid`, `HeroSearch` and `TrustStrip` from the homepage.
 
 Filter bar plus the results list, rendered by [`components/marketplace/search-results.tsx`](../components/marketplace/search-results.tsx) and [`components/marketplace/listing-card.tsx`](../components/marketplace/listing-card.tsx) per profile.
 
+### Find-a-tradesman chat
+
+**File:** [`components/marketplace/find-tradesman-chat.tsx`](../components/marketplace/find-tradesman-chat.tsx)
+
+![Chat — opening question](screenshots/find-chat-initial.png)
+
+Sits above the filter bar on the same search-results page — a guided, scripted conversation (not a live model call; there's no backend/AI service wired up yet) that asks one question at a time: what's wrong, the Eircode, then a preferred date range as quick-reply chips.
+
+![Chat — conversation](screenshots/find-chat-conversation.png)
+
+Each answer appears as its own bubble, right-aligned in the site's orange, alongside the bot's next question — a real chat log, not a form pretending to be one.
+
+![Chat — recommendations](screenshots/find-chat-results.png)
+
+On "Find my plumbers", [`recommendTradespeople()`](../lib/api/marketplace.ts) scores every listing in this category/location — keyword overlap between the typed issue and each listing's services, plus rating, verification, review volume, and an urgency bonus for 24/7 or fast-response businesses when the date range implies urgency — and returns the top 5, reusing the same `ListingCard` the plain filtered list below uses. It's a heuristic over mock data, explicitly not real language understanding; see the `recommendTradespeople` section of [`docs/api-contract.md`](api-contract.md) for how it's meant to be replaced by a real matching/AI service later without any component changing.
+
 ### Public tradesman profile
 
 **File:** [`app/pro/[slug]/page.tsx`](../app/pro/[slug]/page.tsx)
@@ -147,6 +163,10 @@ Filter bar plus the results list, rendered by [`components/marketplace/search-re
 ![Pro profile](screenshots/pro-profile.png)
 
 Services, prices and reviews for one tradesman ([`getMarketplaceProfile()`](../lib/api/marketplace.ts)), the trust badges via [`components/marketplace/trust-block.tsx`](../components/marketplace/trust-block.tsx), and the callback form via [`components/marketplace/contact-form.tsx`](../components/marketplace/contact-form.tsx).
+
+![Contact form — pre-filled from chat](screenshots/pro-prefilled-contact.png)
+
+Arriving from a chat recommendation carries `?issue=&eircode=&dates=` in the URL; the contact form reads them (`useSearchParams`, wrapped in `<Suspense>` in the page since it's a client hook) and pre-fills the description, address and a new "Preferred dates" field, with a small banner explaining why — so nobody repeats themselves.
 
 ---
 
