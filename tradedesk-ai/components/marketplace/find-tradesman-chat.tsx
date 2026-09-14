@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, Loader2, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Loader2, Mic, Sparkles, Square } from "lucide-react";
 
 import { ListingCard } from "@/components/marketplace/listing-card";
 import { iconForCategory } from "@/components/marketplace/photo-tile";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useSpeechToText } from "@/hooks/use-speech-to-text";
 import { cn } from "@/lib/utils";
 import {
   recommendTradespeople,
@@ -18,14 +20,18 @@ import {
 } from "@/lib/api";
 import { tradeTypeLabels } from "@/lib/labels";
 
-type Step = "issue" | "eircode" | "dates" | "confirm" | "loading" | "results";
+type Step =
+  | "trade-confirm"
+  | "redirect"
+  | "issue"
+  | "eircode"
+  | "when"
+  | "confirm"
+  | "loading"
+  | "results";
 
-const DATE_OPTIONS = [
-  "As soon as possible",
-  "This week",
-  "Next 2 weeks",
-  "I'm flexible",
-];
+const TIME_SLOTS = ["Morning", "Afternoon", "Evening"] as const;
+type TimeSlot = (typeof TIME_SLOTS)[number];
 
 interface ChatMessage {
   from: "bot" | "user";
@@ -33,40 +39,100 @@ interface ChatMessage {
 }
 
 /**
- * A guided, scripted conversation — not a real language model. It asks one
- * question at a time (issue, Eircode, date range), then scores this
- * category/location's listings via `recommendTradespeople()` and shows the
- * top 5. See docs/VISUAL_TOUR.md for why this is scripted rather than a live
- * AI call: the project has no backend/model wired up yet, and this reads as
- * a real assistant without pretending to understand free text it can't.
+ * The bot's own "face" — the site's TD mark by default, replaced by a real
+ * photo the moment one exists at this path (same local-only-file pattern as
+ * the hero and audience-split photos; see public/images/README.md). A
+ * background-image on a transparent overlay, not an <img>, so a missing
+ * file never renders as a broken-image icon — the TD mark just shows
+ * through underneath.
+ */
+function AiAvatar({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "bg-primary relative flex shrink-0 items-center justify-center rounded-full text-sm font-bold text-white",
+        className,
+      )}
+    >
+      TD
+      <div
+        aria-hidden
+        className="absolute inset-0 rounded-full bg-cover bg-center"
+        style={{ backgroundImage: "url(/images/ai-agent-avatar.jpg)" }}
+      />
+    </div>
+  );
+}
+
+function todayISO(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/** "Today" / "Tomorrow" / "Tue 16 Sep" — and "Today"/"Tomorrow" double as the
+ *  urgency signal `recommendTradespeople` already looks for in date_range. */
+function formatDateLabel(dateISO: string): string {
+  const chosen = new Date(dateISO + "T00:00:00");
+  const today = new Date(todayISO() + "T00:00:00");
+  const diffDays = Math.round(
+    (chosen.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+  );
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Tomorrow";
+  return chosen.toLocaleDateString("en-IE", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+}
+
+/**
+ * A guided, scripted conversation — not a real language model. It greets,
+ * confirms the trade this page is already scoped to, then asks one question
+ * at a time (issue, Eircode, a date + time slot), before scoring this
+ * category/location's listings via `recommendTradespeople()` and showing
+ * the top 5. See docs/VISUAL_TOUR.md and docs/api-contract.md for why this
+ * is scripted rather than a live AI call: the project has no backend/model
+ * wired up yet, and this reads as a real assistant without pretending to
+ * understand free text it can't.
  */
 export function FindTradesmanChat({
   category,
   location,
   town,
   categories,
+  onResultsChange,
 }: {
   category: TradeType;
   location: string;
   town: string;
   categories: MarketplaceCategory[];
+  /** Told when the recommendation list appears/disappears, so the page can
+   *  hide the plain filtered list while the chat's own results are shown. */
+  onResultsChange?: (hasResults: boolean) => void;
 }) {
   const label = tradeTypeLabels[category].toLowerCase();
 
-  function openingMessage(): ChatMessage {
-    return {
-      from: "bot",
-      text: `Tell me what's going on and I'll match you with ${label}s in ${town} who fit the job.`,
-    };
+  function openingMessages(): ChatMessage[] {
+    return [
+      { from: "bot", text: "Hi, I'm TradeDesk AI 👋" },
+      {
+        from: "bot",
+        text: `Looks like you're after a ${label} in ${town} — is that right?`,
+      },
+    ];
   }
 
-  const [step, setStep] = useState<Step>("issue");
-  const [messages, setMessages] = useState<ChatMessage[]>([openingMessage()]);
+  const [step, setStep] = useState<Step>("trade-confirm");
+  const [messages, setMessages] = useState<ChatMessage[]>(openingMessages());
   const [issue, setIssue] = useState("");
   const [eircode, setEircode] = useState("");
-  const [dateRange, setDateRange] = useState("");
+  const [date, setDate] = useState("");
+  const [slot, setSlot] = useState<TimeSlot | null>(null);
+  const [dateLabel, setDateLabel] = useState("");
   const [draft, setDraft] = useState("");
   const [results, setResults] = useState<MarketplaceListing[] | null>(null);
+
+  const speech = useSpeechToText(setDraft);
 
   function pushBot(text: string) {
     setMessages((current) => [...current, { from: "bot", text }]);
@@ -76,9 +142,22 @@ export function FindTradesmanChat({
     setMessages((current) => [...current, { from: "user", text }]);
   }
 
+  function confirmTrade() {
+    pushUser("Yes, that's right");
+    pushBot("Great — tell me what's going on.");
+    setStep("issue");
+  }
+
+  function declineTrade() {
+    pushUser("Something else");
+    pushBot("No bother — you can browse every trade from here.");
+    setStep("redirect");
+  }
+
   function submitIssue() {
     const text = draft.trim();
     if (!text) return;
+    if (speech.listening) speech.stop();
     setIssue(text);
     pushUser(text);
     setDraft("");
@@ -89,18 +168,22 @@ export function FindTradesmanChat({
   function submitEircode() {
     const text = draft.trim();
     if (!text) return;
+    if (speech.listening) speech.stop();
     setEircode(text);
     pushUser(text);
     setDraft("");
     pushBot("And when would suit you best?");
-    setStep("dates");
+    setStep("when");
   }
 
-  function chooseDateRange(option: string) {
-    setDateRange(option);
-    pushUser(option);
+  function submitWhen() {
+    if (!date || !slot) return;
+    const label = formatDateLabel(date);
+    const combined = `${label}, ${slot.toLowerCase()}`;
+    setDateLabel(combined);
+    pushUser(combined);
     pushBot(
-      `Looking for ${label}s near ${eircode || town} who can do that ${option.toLowerCase()}. Ready when you are.`,
+      `Looking for ${tradeTypeLabels[category].toLowerCase()}s near ${eircode || town} who can do that ${combined.toLowerCase()}. Ready when you are.`,
     );
     setStep("confirm");
   }
@@ -112,20 +195,24 @@ export function FindTradesmanChat({
       location,
       issue_description: issue,
       eircode,
-      date_range: dateRange,
+      date_range: dateLabel,
     });
     setResults(matches);
     setStep("results");
+    onResultsChange?.(true);
   }
 
   function reset() {
-    setStep("issue");
-    setMessages([openingMessage()]);
+    setStep("trade-confirm");
+    setMessages(openingMessages());
     setIssue("");
     setEircode("");
-    setDateRange("");
+    setDate("");
+    setSlot(null);
+    setDateLabel("");
     setDraft("");
     setResults(null);
+    onResultsChange?.(false);
   }
 
   function submitDraft() {
@@ -133,15 +220,13 @@ export function FindTradesmanChat({
     else if (step === "eircode") submitEircode();
   }
 
-  const prefillSuffix = `?issue=${encodeURIComponent(issue)}&eircode=${encodeURIComponent(eircode)}&dates=${encodeURIComponent(dateRange)}`;
+  const prefillSuffix = `?issue=${encodeURIComponent(issue)}&eircode=${encodeURIComponent(eircode)}&dates=${encodeURIComponent(dateLabel)}`;
 
   return (
     <Card className="mb-6 gap-0 overflow-hidden py-0">
       <CardContent className="p-0">
         <div className="band-dark flex items-center gap-2.5 px-5 py-4">
-          <span className="bg-primary flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white">
-            TD
-          </span>
+          <AiAvatar className="size-8" />
           <div className="min-w-0">
             <p className="text-sm font-semibold">TradeDesk AI</p>
             <p className="text-xs text-white/70">
@@ -155,13 +240,16 @@ export function FindTradesmanChat({
             <div
               key={index}
               className={cn(
-                "flex",
+                "flex items-end gap-2",
                 message.from === "user" ? "justify-end" : "justify-start",
               )}
             >
+              {message.from === "bot" ? (
+                <AiAvatar className="size-6 text-[10px]" />
+              ) : null}
               <p
                 className={cn(
-                  "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
+                  "max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
                   message.from === "user"
                     ? "bg-primary text-primary-foreground"
                     : "bg-secondary text-foreground",
@@ -173,7 +261,8 @@ export function FindTradesmanChat({
           ))}
 
           {step === "loading" ? (
-            <div className="flex justify-start">
+            <div className="flex items-end gap-2">
+              <AiAvatar className="size-6 text-[10px]" />
               <p className="bg-secondary text-muted-foreground flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm">
                 <Loader2 className="size-3.5 animate-spin" aria-hidden />
                 Matching you with {label}s in {town}…
@@ -186,7 +275,7 @@ export function FindTradesmanChat({
               <p className="text-muted-foreground text-sm">
                 {results.length > 0
                   ? "Here's who I'd recommend, best fit first — pick one to send your details across."
-                  : "Nobody matches exactly right now — try the full list below instead."}
+                  : "Nobody matches exactly right now — try again with different details."}
               </p>
               {results.length > 0 ? (
                 <ul className="space-y-3">
@@ -207,6 +296,30 @@ export function FindTradesmanChat({
             </div>
           ) : null}
         </div>
+
+        {step === "trade-confirm" ? (
+          <div className="flex flex-wrap gap-2 border-t px-5 py-4">
+            <Button type="button" size="sm" onClick={confirmTrade}>
+              Yes, that&apos;s right
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={declineTrade}
+            >
+              Something else
+            </Button>
+          </div>
+        ) : null}
+
+        {step === "redirect" ? (
+          <div className="border-t px-5 py-4">
+            <Button asChild size="sm">
+              <Link href="/find">Browse every trade</Link>
+            </Button>
+          </div>
+        ) : null}
 
         {step === "issue" || step === "eircode" ? (
           <form
@@ -240,6 +353,23 @@ export function FindTradesmanChat({
                   placeholder="e.g. W91 X2R0"
                 />
               )}
+              {speech.isSupported ? (
+                <Button
+                  type="button"
+                  size="icon"
+                  variant={speech.listening ? "default" : "outline"}
+                  className="shrink-0"
+                  onClick={() =>
+                    speech.listening ? speech.stop() : speech.start()
+                  }
+                  aria-label={
+                    speech.listening ? "Stop voice input" : "Use voice input"
+                  }
+                  aria-pressed={speech.listening}
+                >
+                  {speech.listening ? <Square /> : <Mic />}
+                </Button>
+              ) : null}
               <Button
                 type="submit"
                 size="icon"
@@ -250,22 +380,45 @@ export function FindTradesmanChat({
                 <ArrowRight />
               </Button>
             </div>
+            {speech.listening ? (
+              <p className="text-muted-foreground mt-2 text-xs">
+                Listening… speak now, then press send.
+              </p>
+            ) : null}
           </form>
         ) : null}
 
-        {step === "dates" ? (
-          <div className="flex flex-wrap gap-2 border-t px-5 py-4">
-            {DATE_OPTIONS.map((option) => (
-              <Button
-                key={option}
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => chooseDateRange(option)}
-              >
-                {option}
-              </Button>
-            ))}
+        {step === "when" ? (
+          <div className="space-y-3 border-t px-5 py-4">
+            <input
+              type="date"
+              value={date}
+              min={todayISO()}
+              onChange={(event) => setDate(event.target.value)}
+              className="border-input h-10 w-full rounded-lg border bg-transparent px-3 text-sm"
+              aria-label="Preferred date"
+            />
+            <div className="flex flex-wrap gap-2">
+              {TIME_SLOTS.map((option) => (
+                <Button
+                  key={option}
+                  type="button"
+                  variant={slot === option ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSlot(option)}
+                >
+                  {option}
+                </Button>
+              ))}
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              disabled={!date || !slot}
+              onClick={submitWhen}
+            >
+              Confirm
+            </Button>
           </div>
         ) : null}
 

@@ -142,19 +142,21 @@ Filter bar plus the results list, rendered by [`components/marketplace/search-re
 
 ### Find-a-tradesman chat
 
-**File:** [`components/marketplace/find-tradesman-chat.tsx`](../components/marketplace/find-tradesman-chat.tsx)
+**Files:** [`components/marketplace/find-and-browse.tsx`](../components/marketplace/find-and-browse.tsx) (holds whether the chat has results yet), [`components/marketplace/find-tradesman-chat.tsx`](../components/marketplace/find-tradesman-chat.tsx) (the conversation itself), [`hooks/use-speech-to-text.ts`](../hooks/use-speech-to-text.ts) (voice input)
 
 ![Chat — opening question](screenshots/find-chat-initial.png)
 
-Sits above the filter bar on the same search-results page — a guided, scripted conversation (not a live model call; there's no backend/AI service wired up yet) that asks one question at a time: what's wrong, the Eircode, then a preferred date range as quick-reply chips.
+Sits above the filter bar on the same search-results page — a guided, scripted conversation (not a live model call; there's no backend/AI service wired up yet). It greets, confirms the trade this page is already scoped to ("Looks like you're after a plumber — is that right?"), then asks one question at a time: what's wrong, the Eircode, then a preferred date. Every bot message carries its own avatar — the site's TD mark until a real photo exists at `public/images/ai-agent-avatar.jpg` (see `public/images/README.md`); a background-image on a transparent overlay, so a missing file just shows the mark through underneath rather than a broken-image icon.
+
+The issue and Eircode steps also take voice input — a mic button (hidden when the browser doesn't support the Web Speech API, e.g. Firefox) transcribes speech to text client-side and feeds it into the same typed flow; there's no server-side speech or language understanding involved.
 
 ![Chat — conversation](screenshots/find-chat-conversation.png)
 
-Each answer appears as its own bubble, right-aligned in the site's orange, alongside the bot's next question — a real chat log, not a form pretending to be one.
+Each answer appears as its own bubble, right-aligned in the site's orange. The date step is a native `<input type="date">` plus a Morning/Afternoon/Evening choice, not a hand-built calendar widget — deliberately, after an earlier hand-coded illustration on this site (see the audience-split section above) came out looking broken; native form controls avoid that risk entirely.
 
 ![Chat — recommendations](screenshots/find-chat-results.png)
 
-On "Find my plumbers", [`recommendTradespeople()`](../lib/api/marketplace.ts) scores every listing in this category/location — keyword overlap between the typed issue and each listing's services, plus rating, verification, review volume, and an urgency bonus for 24/7 or fast-response businesses when the date range implies urgency — and returns the top 5, reusing the same `ListingCard` the plain filtered list below uses. It's a heuristic over mock data, explicitly not real language understanding; see the `recommendTradespeople` section of [`docs/api-contract.md`](api-contract.md) for how it's meant to be replaced by a real matching/AI service later without any component changing.
+On "Find my plumbers", [`recommendTradespeople()`](../lib/api/marketplace.ts) scores every listing in this category/location — keyword overlap between the typed issue and each listing's services, plus rating, verification, review volume, and an urgency bonus for 24/7 or fast-response businesses when "Today"/"Tomorrow" was picked — and returns the top 5, reusing the same `ListingCard` the plain filtered list uses. Once the chat has an answer, `FindAndBrowse` stops rendering the plain `SearchResults` list entirely — the two are mutually exclusive, not stacked — until "Start over" resets the chat. It's a heuristic over mock data, explicitly not real language understanding; see the `recommendTradespeople` section of [`docs/api-contract.md`](api-contract.md) for how it's meant to be replaced by a real matching/AI service later without any component changing.
 
 ### Public tradesman profile
 

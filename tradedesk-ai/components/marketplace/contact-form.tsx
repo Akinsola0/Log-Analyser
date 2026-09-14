@@ -63,7 +63,11 @@ export function ContactForm({ profile }: { profile: MarketplaceProfile }) {
     customer_address: prefill.eircode,
     service: profile.services[0]?.name ?? "",
     description: prefill.issue,
-    urgency: /as soon as possible/i.test(prefill.dates) ? "urgent" : "routine",
+    urgency: /\b(asap|as soon as possible|emergency|today|now)\b/i.test(
+      prefill.dates,
+    )
+      ? "urgent"
+      : "routine",
     preferred_channel: "whatsapp",
     preferred_date_range: prefill.dates || undefined,
   });
