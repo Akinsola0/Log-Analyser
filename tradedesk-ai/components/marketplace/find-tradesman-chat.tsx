@@ -39,27 +39,30 @@ interface ChatMessage {
 }
 
 /**
- * The bot's own "face" — the site's TD mark by default, replaced by a real
- * photo the moment one exists at this path (same local-only-file pattern as
- * the hero and audience-split photos; see public/images/README.md). A
- * background-image on a transparent overlay, not an <img>, so a missing
- * file never renders as a broken-image icon — the TD mark just shows
- * through underneath.
+ * The bot's "face" — a glossy gradient sphere in the brand orange, not a
+ * headshot. A small off-centre highlight fakes the glossy-sphere look
+ * without an actual 3D render. `pulse` marks the moments the AI is
+ * "thinking" between turns (matching prop on the loading-state avatar).
  */
-function AiAvatar({ className }: { className?: string }) {
+function AiAvatar({
+  className,
+  pulse = false,
+}: {
+  className?: string;
+  pulse?: boolean;
+}) {
   return (
     <div
+      aria-hidden
       className={cn(
-        "bg-primary relative flex shrink-0 items-center justify-center rounded-full text-sm font-bold text-white",
+        "relative shrink-0 overflow-hidden rounded-full",
+        "bg-[radial-gradient(circle_at_32%_28%,#ffb27a_0%,#e8590c_45%,#8a2c05_100%)]",
+        "shadow-[0_0_0_1px_rgba(199,63,8,0.15),0_0_14px_2px_rgba(199,63,8,0.35)]",
+        pulse && "animate-pulse",
         className,
       )}
     >
-      TD
-      <div
-        aria-hidden
-        className="absolute inset-0 rounded-full bg-cover bg-center"
-        style={{ backgroundImage: "url(/images/ai-agent-avatar.jpg)" }}
-      />
+      <div className="absolute -top-1/4 -left-1/4 size-1/2 rounded-full bg-white/40 blur-[3px]" />
     </div>
   );
 }
@@ -263,14 +266,12 @@ export function FindTradesmanChat({
                 message.from === "user" ? "justify-end" : "justify-start",
               )}
             >
-              {message.from === "bot" ? (
-                <AiAvatar className="size-6 text-[10px]" />
-              ) : null}
+              {message.from === "bot" ? <AiAvatar className="size-6" /> : null}
               <p
                 className={cn(
-                  "max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
+                  "max-w-[80%] rounded-3xl px-4 py-2.5 text-sm leading-relaxed",
                   message.from === "user"
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-[linear-gradient(135deg,#e8590c,#a8330a)] text-white shadow-sm"
                     : "bg-secondary text-foreground",
                 )}
               >
@@ -281,8 +282,8 @@ export function FindTradesmanChat({
 
           {step === "loading" ? (
             <div className="flex items-end gap-2">
-              <AiAvatar className="size-6 text-[10px]" />
-              <p className="bg-secondary text-muted-foreground flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm">
+              <AiAvatar className="size-6" pulse />
+              <p className="bg-secondary text-muted-foreground flex items-center gap-2 rounded-3xl px-4 py-2.5 text-sm">
                 <Loader2 className="size-3.5 animate-spin" aria-hidden />
                 Matching you with {label}s in {town}…
               </p>
@@ -348,15 +349,15 @@ export function FindTradesmanChat({
             }}
             className="border-t px-5 py-4"
           >
-            <div className="flex gap-2">
-              {step === "issue" ? (
+            {step === "issue" ? (
+              <div className="border-input focus-within:border-ring focus-within:ring-ring/40 rounded-3xl border bg-white shadow-xs transition-[color,box-shadow] focus-within:ring-[3px]">
                 <Textarea
                   autoFocus
                   rows={2}
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
                   placeholder="e.g. Boiler's making a banging noise and the upstairs radiators are cold"
-                  className="resize-none"
+                  className="resize-none border-0 shadow-none focus-visible:ring-0"
                   onKeyDown={(event) => {
                     if (event.key === "Enter" && !event.shiftKey) {
                       event.preventDefault();
@@ -364,41 +365,74 @@ export function FindTradesmanChat({
                     }
                   }}
                 />
-              ) : (
+                <div className="flex items-center justify-end gap-1.5 px-2 pb-2">
+                  {speech.isSupported ? (
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant={speech.listening ? "default" : "ghost"}
+                      className="size-9 shrink-0"
+                      onClick={() =>
+                        speech.listening ? speech.stop() : speech.start()
+                      }
+                      aria-label={
+                        speech.listening
+                          ? "Stop voice input"
+                          : "Use voice input"
+                      }
+                      aria-pressed={speech.listening}
+                    >
+                      {speech.listening ? <Square /> : <Mic />}
+                    </Button>
+                  ) : null}
+                  <Button
+                    type="submit"
+                    size="icon"
+                    className="size-9 shrink-0"
+                    disabled={!draft.trim()}
+                    aria-label="Send"
+                  >
+                    <ArrowRight />
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="border-input focus-within:border-ring focus-within:ring-ring/40 flex items-center gap-1 rounded-full border bg-white py-1.5 pr-1.5 pl-4 shadow-xs transition-[color,box-shadow] focus-within:ring-[3px]">
                 <Input
                   autoFocus
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
                   placeholder="e.g. W91 X2R0"
+                  className="h-8 flex-1 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
                 />
-              )}
-              {speech.isSupported ? (
+                {speech.isSupported ? (
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant={speech.listening ? "default" : "ghost"}
+                    className="size-9 shrink-0"
+                    onClick={() =>
+                      speech.listening ? speech.stop() : speech.start()
+                    }
+                    aria-label={
+                      speech.listening ? "Stop voice input" : "Use voice input"
+                    }
+                    aria-pressed={speech.listening}
+                  >
+                    {speech.listening ? <Square /> : <Mic />}
+                  </Button>
+                ) : null}
                 <Button
-                  type="button"
+                  type="submit"
                   size="icon"
-                  variant={speech.listening ? "default" : "outline"}
-                  className="shrink-0"
-                  onClick={() =>
-                    speech.listening ? speech.stop() : speech.start()
-                  }
-                  aria-label={
-                    speech.listening ? "Stop voice input" : "Use voice input"
-                  }
-                  aria-pressed={speech.listening}
+                  className="size-9 shrink-0"
+                  disabled={!draft.trim()}
+                  aria-label="Send"
                 >
-                  {speech.listening ? <Square /> : <Mic />}
+                  <ArrowRight />
                 </Button>
-              ) : null}
-              <Button
-                type="submit"
-                size="icon"
-                className="shrink-0"
-                disabled={!draft.trim()}
-                aria-label="Send"
-              >
-                <ArrowRight />
-              </Button>
-            </div>
+              </div>
+            )}
             {speech.listening ? (
               <p className="text-muted-foreground mt-2 text-xs">
                 Listening… speak now, then press send.
@@ -414,7 +448,7 @@ export function FindTradesmanChat({
               value={date}
               min={todayISO()}
               onChange={(event) => setDate(event.target.value)}
-              className="border-input h-10 w-full rounded-lg border bg-transparent px-3 text-sm"
+              className="border-input h-10 w-full rounded-2xl border bg-transparent px-3 text-sm"
               aria-label="Preferred date"
             />
             <div className="flex flex-wrap gap-2">
