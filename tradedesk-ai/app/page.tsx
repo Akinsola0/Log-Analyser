@@ -1,5 +1,4 @@
 import { AudienceSplit } from "@/components/marketing/audience-split";
-import { CategoryGrid } from "@/components/marketing/category-grid";
 import { CostComparison } from "@/components/marketing/cost-comparison";
 import { CtaBand } from "@/components/marketing/cta-band";
 import { Faq } from "@/components/marketing/faq";
@@ -24,10 +23,6 @@ export default async function HomePage() {
         <Hero categories={categories} locations={locations} />
         <AudienceSplit />
         <TrustStrip />
-        <CategoryGrid
-          categories={categories}
-          defaultLocation={locations[0]?.slug ?? "naas"}
-        />
         <Reviews reviews={reviews} />
         <HowItWorks />
         <CostComparison />

@@ -44,14 +44,6 @@ The business panel's background is an olive/khaki gradient (`linear-gradient(160
 
 A row of small credibility markers, now sitting under the audience split rather than directly under the hero.
 
-### Category grid
-
-![Category grid](screenshots/category-grid.png)
-
-**File:** [`components/marketing/category-grid.tsx`](../components/marketing/category-grid.tsx)
-
-Browsable trade categories with indicative prices, sourced from [`getCategories()`](../lib/api/marketplace.ts). Icons resolved by [`components/marketing/category-icon.tsx`](../components/marketing/category-icon.tsx).
-
 ### Reviews
 
 ![Reviews](screenshots/reviews.png)
@@ -130,7 +122,7 @@ Auth is demo-only today: accounts live in browser `localStorage` via [`lib/api/m
 
 ![Find — index](screenshots/find-index.png)
 
-Reuses `CategoryGrid`, `HeroSearch` and `TrustStrip` from the homepage.
+Reuses [`components/marketing/category-grid.tsx`](../components/marketing/category-grid.tsx) (browsable trade categories with indicative prices, sourced from [`getCategories()`](../lib/api/marketplace.ts)), `HeroSearch` and `TrustStrip` — `CategoryGrid` no longer appears on the homepage itself, only here.
 
 ### Search results
 
